@@ -1,12 +1,12 @@
 # Technical Implementation Plan
 
 **Project**: Expense Tracker  
-**Version**: 1.0  
-**Date**: December 4, 2025
+**Version**: 2.0  
+**Date**: December 5, 2025
 
 ## Executive Summary
 
-Build a client-side web application using Nuxt 3, TypeScript, and TailwindCSS that enables users to track income/expenses, view financial summaries, and export data. All data stored locally in browser with zero backend dependencies.
+Build a full-stack web application using Nuxt 3, TypeScript, TailwindCSS, and Supabase that enables users to track income/expenses, view financial summaries, and export data. All data stored securely in Supabase PostgreSQL with user authentication and multi-device sync. Deploy to Netlify for production hosting.
 
 ## Technology Stack
 
@@ -37,11 +37,24 @@ Build a client-side web application using Nuxt 3, TypeScript, and TailwindCSS th
   - DevTools integration
 - **@pinia/nuxt** - Auto-import stores
 
-### Browser Storage
+### Backend & Database
+- **Supabase** - Backend as a Service
+  - PostgreSQL database (managed)
+  - Authentication & authorization (JWT)
+  - Row Level Security (RLS) policies
+  - Real-time subscriptions (optional)
+  - Auto-generated REST API
+- **@nuxtjs/supabase** - Official Nuxt module
+  - Auto-import Supabase client
+  - Authentication composables
+  - Server-side rendering support
+
+### Browser Storage (For Settings Only)
 - **VueUse** - Composition utilities collection
-  - `useLocalStorage` for reactive persistence
+  - `useLocalStorage` for user preferences/settings
   - `useNow` for real-time date updates
   - TypeScript support built-in
+  - Note: Transaction data stored in Supabase, not LocalStorage
 
 ### Date & Time
 - **date-fns 3.x** - Modern date utility library
@@ -96,10 +109,15 @@ expense-tracker/
 │   ├── useDateRange.ts       # Period calculations
 │   ├── useCSVExport.ts       # Export logic
 │   └── useFilters.ts         # Search & filter logic
+├── middleware/
+│   └── auth.ts               # Authentication middleware
 ├── layouts/
 │   └── default.vue           # Main app layout
 ├── pages/
 │   ├── index.vue            # Dashboard
+│   ├── login.vue            # Login page
+│   ├── register.vue         # Registration page
+│   ├── forgot-password.vue  # Password reset
 │   ├── transactions/
 │   │   └── index.vue        # Transactions list
 │   └── settings.vue         # Settings page
@@ -114,6 +132,8 @@ expense-tracker/
 ├── utils/
 │   ├── validators.ts        # Zod schemas
 │   └── constants.ts         # App constants
+├── supabase/
+│   └── migrations/          # Database migrations
 ├── nuxt.config.ts
 ├── tailwind.config.ts
 ├── tsconfig.json
@@ -126,7 +146,8 @@ expense-tracker/
 #### Transaction
 ```typescript
 interface Transaction {
-  id: string;              // UUID v4
+  id: string;              // UUID v4 (from Supabase)
+  userId: string;          // User ID (from Supabase Auth)
   date: Date;              // Transaction date
   type: 'income' | 'expense';
   amount: number;          // Positive number, cents precision
@@ -141,7 +162,8 @@ interface Transaction {
 #### Category
 ```typescript
 interface Category {
-  id: string;              // Prefixed: cat-income-*, cat-expense-*
+  id: string;              // UUID (from Supabase)
+  userId?: string;         // User ID (null for default categories)
   name: string;
   type: 'income' | 'expense' | 'both';
   color: string;           // Hex color
@@ -152,24 +174,47 @@ interface Category {
 
 #### Settings
 ```typescript
-interface Settings {
+interface UserSettings {
+  userId: string;          // User ID
   currency: 'VND' | 'USD';
   dateFormat: 'DD/MM/YYYY' | 'YYYY-MM-DD';
   numberFormat: '1.000.000' | '1,000,000';
   defaultView: 'dashboard' | 'transactions';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
 }
 ```
 
-### Storage Strategy
+### Database Strategy (Supabase)
 
-#### LocalStorage Keys
+#### Database Tables
+- **transactions** - User transactions with RLS
+- **categories** - Default + user custom categories with RLS
+- **user_settings** - User preferences with RLS
+- **auth.users** - Managed by Supabase Auth
+
+#### Row Level Security (RLS) Policies
+```sql
+-- Users can only access their own data
+CREATE POLICY "Users can view own transactions" ON transactions
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Users can create own transactions" ON transactions
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- Similar policies for categories and settings
+```
+
+#### Authentication Flow
+1. User registers with email + password
+2. Email verification sent (Supabase)
+3. User logs in → JWT token stored in cookie
+4. All API requests authenticated via JWT
+5. RLS policies enforce data isolation
+
+#### LocalStorage (Settings Only)
 ```typescript
 const STORAGE_KEYS = {
-  TRANSACTIONS: 'expense-tracker:transactions',
-  CATEGORIES: 'expense-tracker:categories',
-  SETTINGS: 'expense-tracker:settings',
-  VERSION: 'expense-tracker:version'
+  THEME_PREFERENCE: 'expense-tracker:theme',  // UI theme only
 } as const;
 ```
 
@@ -184,25 +229,97 @@ interface StoredData<T> {
 
 ### State Management Pattern
 
-#### Store Structure (Pinia)
+#### Store Structure (Pinia + Supabase)
 ```typescript
 // stores/transactions.ts
 export const useTransactionsStore = defineStore('transactions', () => {
-  // State (using VueUse for persistence)
-  const transactions = useLocalStorage<Transaction[]>('expense-tracker:transactions', []);
+  const supabase = useSupabaseClient();
+  const user = useSupabaseUser();
+  
+  // State (reactive refs)
+  const transactions = ref<Transaction[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
   
   // Getters (computed)
-  const sortedTransactions = computed(() => ...);
-  const totalIncome = computed(() => ...);
-  const totalExpense = computed(() => ...);
+  const sortedTransactions = computed(() => 
+    [...transactions.value].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+  );
+  const totalIncome = computed(() => 
+    transactions.value
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+  const totalExpense = computed(() => 
+    transactions.value
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
   
   // Actions (methods)
-  function addTransaction(input: TransactionInput) { ... }
-  function updateTransaction(id: string, updates: Partial<Transaction>) { ... }
-  function deleteTransaction(id: string) { ... }
+  async function fetchTransactions() {
+    loading.value = true;
+    error.value = null;
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.value?.id)
+        .order('date', { ascending: false });
+      
+      if (fetchError) throw fetchError;
+      transactions.value = data || [];
+    } catch (e) {
+      error.value = e.message;
+    } finally {
+      loading.value = false;
+    }
+  }
+  
+  async function addTransaction(input: TransactionInput) {
+    const { data, error: insertError } = await supabase
+      .from('transactions')
+      .insert({ ...input, user_id: user.value?.id })
+      .select()
+      .single();
+    
+    if (insertError) throw insertError;
+    transactions.value.push(data);
+    return data;
+  }
+  
+  async function updateTransaction(id: string, updates: Partial<Transaction>) {
+    const { data, error: updateError } = await supabase
+      .from('transactions')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', user.value?.id)
+      .select()
+      .single();
+    
+    if (updateError) throw updateError;
+    const index = transactions.value.findIndex(t => t.id === id);
+    if (index !== -1) transactions.value[index] = data;
+    return data;
+  }
+  
+  async function deleteTransaction(id: string) {
+    const { error: deleteError } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.value?.id);
+    
+    if (deleteError) throw deleteError;
+    transactions.value = transactions.value.filter(t => t.id !== id);
+  }
   
   return {
     transactions,
+    loading,
+    error,
     sortedTransactions,
     totalIncome,
     totalExpense,

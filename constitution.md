@@ -1,12 +1,12 @@
 # Project Constitution
 
 **Project**: Expense Tracker  
-**Version**: 1.0  
-**Last Updated**: December 4, 2025
+**Version**: 2.0  
+**Last Updated**: December 5, 2025
 
 ## Vision & Purpose
 
-Build a simple, reliable, and user-friendly expense tracking application that helps individuals take control of their personal finances through clear visualization and easy data management.
+Build a simple, reliable, and user-friendly expense tracking application that helps individuals take control of their personal finances through clear visualization, easy data management, and secure cloud synchronization across devices.
 
 ## Core Principles
 
@@ -17,10 +17,12 @@ Build a simple, reliable, and user-friendly expense tracking application that he
 - **Performance**: < 2s initial page load, < 100ms for user interactions
 
 ### 2. Data Privacy & Ownership
-- **Local-First**: All data stored client-side by default (LocalStorage/IndexedDB)
-- **No External Dependencies**: Zero third-party tracking or analytics
-- **User Control**: Users own 100% of their data with easy export capabilities
-- **Transparent Storage**: Clear documentation of what data is stored and where
+- **Cloud-First with Ownership**: Data stored in user's own Supabase account with full ownership and control
+- **User Isolation**: Row Level Security (RLS) ensures users can only access their own data
+- **No Third-Party Tracking**: Zero analytics, tracking, or data sharing with external services
+- **User Control**: Users own 100% of their data with easy export (CSV) and complete deletion capabilities
+- **Transparent Storage**: Clear documentation of database schema, RLS policies, and data location
+- **Multi-Device Sync**: Seamless synchronization across all user's devices via cloud backend
 
 ### 3. Code Quality Standards
 
@@ -82,10 +84,15 @@ Build a simple, reliable, and user-friendly expense tracking application that he
 - **No Bloat**: Bundle size analysis before adding new dependencies
 
 ### 9. Security Practices
+- **Authentication Required**: All features require valid user authentication
+- **Row Level Security**: Database-level access control via Supabase RLS policies
 - **Input Validation**: Sanitize all user input (descriptions, amounts)
 - **XSS Prevention**: Escape user-generated content in templates
 - **CSP Headers**: Content Security Policy in production
-- **No Secrets in Code**: Environment variables for any sensitive config
+- **No Secrets in Code**: Environment variables for Supabase credentials
+- **HTTPS Only**: All connections encrypted via TLS
+- **Password Requirements**: Minimum 8 characters, email verification required
+- **Session Management**: Secure JWT tokens with automatic refresh
 
 ### 10. Documentation Standards
 - **README-Driven**: Update README before starting features
@@ -98,6 +105,7 @@ Build a simple, reliable, and user-friendly expense tracking application that he
 ### Approved Stack
 - **Framework**: Nuxt 3 (Vue 3)
 - **Language**: TypeScript (strict mode)
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
 - **Styling**: TailwindCSS
 - **State**: Pinia
 - **Utilities**: VueUse, date-fns
@@ -108,8 +116,9 @@ Build a simple, reliable, and user-friendly expense tracking application that he
 - ❌ jQuery or legacy Vue 2 patterns
 - ❌ CSS-in-JS libraries (use Tailwind)
 - ❌ Heavy UI frameworks (Bootstrap, Material UI)
-- ❌ Backend dependencies (no server required for MVP)
-- ❌ External API calls (except CDNs)
+- ❌ Custom backend servers (use Supabase BaaS only)
+- ❌ Third-party analytics or tracking services
+- ❌ Unencrypted data transmission (HTTPS/TLS required)
 
 ## Engineering Practices
 
@@ -117,10 +126,11 @@ Build a simple, reliable, and user-friendly expense tracking application that he
 A feature is complete when:
 1. ✅ TypeScript compiles with zero errors
 2. ✅ Works on mobile and desktop viewports
-3. ✅ Data persists correctly to LocalStorage
-4. ✅ No console errors or warnings
-5. ✅ README updated if user-facing
-6. ✅ Committed with conventional commit message
+3. ✅ Data persists correctly to Supabase with RLS enforced
+4. ✅ Authentication and authorization working correctly
+5. ✅ No console errors or warnings
+6. ✅ README updated if user-facing
+7. ✅ Committed with conventional commit message
 
 ### Code Style
 - **Formatting**: Prettier with default config
@@ -210,6 +220,21 @@ A feature is complete when:
 - **Accessibility**: All core features must be accessible
 - **Performance**: User interactions must feel instant
 
+## Deployment & Environment
+
+### Production Hosting
+- **Platform**: Netlify (static site deployment)
+- **Database**: Supabase (managed PostgreSQL)
+- **Environment Variables**: Stored securely in Netlify dashboard
+- **SSL/TLS**: Automatic HTTPS via Netlify
+- **CDN**: Global content delivery for performance
+
+### Environment Management
+- **Development**: Local Nuxt dev server + Supabase dev project
+- **Staging**: Optional staging environment for testing
+- **Production**: Netlify production + Supabase production project
+- **Secrets**: Never commit API keys or credentials to git
+
 ## Compliance & Legal
 
 ### Open Source
@@ -218,9 +243,12 @@ A feature is complete when:
 - **No Warranty**: Clear disclaimer in README
 
 ### Data Protection
-- **No PII Collection**: App doesn't know who users are
+- **Minimal PII**: Only email address collected for authentication
 - **No Telemetry**: Zero usage tracking or analytics
-- **User Control**: Users manage all their data locally
+- **User Control**: Users can export and delete all their data
+- **Data Encryption**: Encryption at rest (Supabase) and in transit (HTTPS)
+- **GDPR Compliant**: Right to access, export, and deletion
+- **Data Isolation**: RLS ensures complete user data separation
 
 ---
 

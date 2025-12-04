@@ -116,23 +116,140 @@ interface UserSettings {
 **So that** tôi có thể quản lý tài chính cá nhân và bảo mật dữ liệu của mình
 
 **Acceptance Criteria:**
+
+**Registration:**
 - ✅ User có thể đăng ký tài khoản mới với email + password
 - ✅ Email verification required (Supabase email confirmation)
+- ✅ Password requirements: Minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 number
+- ✅ Email format validation: RFC 5322 compliant, normalized to lowercase
+- ✅ Account creation errors:
+  - Email already exists → "Email đã được sử dụng. Vui lòng đăng nhập hoặc sử dụng email khác."
+  - Invalid email format → "Email không hợp lệ. Vui lòng kiểm tra lại."
+  - Weak password → "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số."
+  - Network error → "Không thể kết nối. Vui lòng kiểm tra mạng và thử lại."
+- ✅ Email verification:
+  - Verification link expires sau 24 giờ
+  - Resend verification email: Max 3 lần/giờ (rate limiting)
+  - Unverified accounts: Không thể login, tự động xóa sau 7 ngày
+  - Verification success → Auto-login và redirect to dashboard
+
+**Login:**
 - ✅ User có thể đăng nhập với email + password
+- ✅ Login errors:
+  - Invalid credentials → "Email hoặc mật khẩu không đúng." (generic message để prevent email enumeration)
+  - Email not verified → "Vui lòng xác thực email. [Gửi lại email xác thực]"
+  - Account locked → "Tài khoản tạm khóa do đăng nhập sai quá nhiều. Thử lại sau 15 phút."
+  - Network error → "Không thể kết nối. Vui lòng thử lại."
+- ✅ Brute force protection:
+  - Max 5 failed attempts trong 15 phút → Lock account 15 phút
+  - Rate limiting: Max 10 login attempts/IP/phút
+  - CAPTCHA sau 3 failed attempts (optional P2)
+- ✅ Session management:
+  - Session duration: 7 days (Remember me: 30 days)
+  - JWT token auto-refresh 5 phút trước khi expire
+  - Concurrent sessions: Allow multiple devices (max 5 active sessions)
+  - Token expiration handling:
+    - Access token expire → Silent refresh với refresh token
+    - Refresh token expire → Force logout, redirect to login, preserve return URL
+    - Mid-operation expire → Queue operation, refresh token, retry operation
+
+**Logout:**
 - ✅ User có thể đăng xuất
+- ✅ Logout behavior:
+  - Clear local session (Supabase session, Pinia store)
+  - Revoke refresh token server-side
+  - Redirect to login page
+  - Pending API calls → Abort requests, show "Đã đăng xuất" message
+  - Unsaved data → Warn "Bạn có thay đổi chưa lưu. Đăng xuất?" với [Lưu & Đăng xuất] [Hủy]
+- ✅ Logout race conditions:
+  - User clicks logout nhiều lần → Debounce, single logout call
+  - Logout during transaction creation → Save to local draft, restore on next login
+
+**Password Reset:**
 - ✅ User có thể reset password qua email
-- ✅ Session persistence (auto-login khi quay lại)
+- ✅ Reset flow:
+  - Enter email → Send reset link (always show success để prevent email enumeration)
+  - Reset link expires sau 1 giờ
+  - Reset link one-time use (invalid after successful reset)
+  - Rate limiting: Max 3 reset emails/email/giờ
+- ✅ Reset page:
+  - New password validation: Same requirements as registration
+  - Confirm password field: Must match
+  - Success → Auto-login với new password
+  - Expired/invalid link → "Link đã hết hạn. [Gửi lại link reset]"
+
+**Protected Routes:**
 - ✅ Protected routes: Redirect to login nếu chưa authenticate
-- ✅ Social login options: Google, GitHub (optional P2)
+- ✅ Redirect behavior:
+  - Store intended destination in query param: `/login?redirect=/transactions`
+  - After login → Redirect to intended page hoặc dashboard
+  - Deep links preserved: Query params, hash fragments
+  - Already authenticated → Skip login page, direct to app
+
+**Social Login (Optional P2):**
+- ✅ Social login options: Google, GitHub
+- ✅ Account linking:
+  - Email conflict → "Email đã tồn tại. [Đăng nhập bằng mật khẩu] [Liên kết tài khoản]"
+  - Link existing account: Require password confirmation
+  - Unlink social provider: Require at least 1 login method
+
+**Data Isolation:**
 - ✅ User chỉ thấy và quản lý được data của chính mình
+- ✅ Row Level Security (RLS) enforcement:
+  - All queries filtered by `auth.uid()`
+  - Bypass attempts logged và blocked
+  - 403 Forbidden → "Bạn không có quyền truy cập." + redirect to dashboard
+
+**Security Requirements:**
+- ✅ Password hashing: bcrypt via Supabase (automatic)
+- ✅ Password storage: Never log hoặc expose passwords
+- ✅ Session security: HttpOnly cookies, Secure flag, SameSite=Lax
+- ✅ CSRF protection: Supabase handles via JWT
+- ✅ XSS prevention:
+  - Sanitize all user inputs (email, password hints)
+  - Content-Security-Policy headers
+  - No eval(), innerHTML với user data
+- ✅ SQL Injection prevention: Supabase parameterized queries (automatic)
+- ✅ Rate limiting:
+  - Login: 10/minute/IP
+  - Registration: 3/hour/IP
+  - Password reset: 3/hour/email
+  - Email verification resend: 3/hour/email
+
+**Testing Requirements:**
+- ✅ Security test cases:
+  - RLS bypass attempts (auth.uid() manipulation)
+  - JWT token manipulation
+  - SQL injection attempts in email field
+  - XSS attempts in email/password fields
+  - CSRF attacks (should fail)
+  - Brute force login attempts (should lock)
+  - Session fixation attacks
+  - Concurrent session handling
+- ✅ Functional test cases:
+  - Registration with valid/invalid data
+  - Login with correct/wrong credentials
+  - Email verification flow (happy + expired link)
+  - Password reset flow (happy + expired link)
+  - Token refresh flow
+  - Logout with pending operations
+  - Protected route access when unauthenticated
 
 **Technical Notes:**
 - Supabase Auth với email/password provider
 - Middleware: `middleware/auth.ts` để protect routes
+  - Check auth.user() !== null
+  - Handle token refresh errors
+  - Preserve return URL in query params
 - Composable: `useAuth.ts` cho auth state
-- Pages: `pages/login.vue`, `pages/register.vue`, `pages/forgot-password.vue`
-- Auto-create default categories khi user đăng ký lần đầu
+  - Reactive user state
+  - Login/logout methods
+  - Token refresh logic
+  - Error handling wrapper
+- Pages: `pages/login.vue`, `pages/register.vue`, `pages/forgot-password.vue`, `pages/reset-password.vue`
+- Auto-create default categories khi user đăng ký lần đầu (idempotent)
 - Row Level Security (RLS) policies trong Supabase
+- Error logging: Log authentication errors (exclude passwords) to monitoring service
 
 ---
 
@@ -144,20 +261,158 @@ interface UserSettings {
 **So that** tôi có thể theo dõi thu chi hằng ngày
 
 **Acceptance Criteria:**
+
+**Create Transaction:**
 - ✅ User có thể thêm transaction mới với: date, type (income/expense), amount, category, description
-- ✅ Form validation: amount > 0, date không để trống, category được chọn
+- ✅ Form validation:
+  - Amount: > 0, ≤ 999,999,999,999.99, max 2 decimal places
+  - Date: Không để trống, ≥ 1900-01-01, ≤ (today + 1 year)
+  - Type: Required, must be 'income' hoặc 'expense'
+  - Category: Required, must exist và thuộc user (hoặc default)
+  - Description: Optional, max 500 characters, sanitize HTML
+  - Tags: Optional, max 10 tags, max 50 characters/tag
+- ✅ Real-time validation:
+  - On blur: Validate field ngay khi user rời khỏi input
+  - On submit: Validate toàn bộ form
+  - Error display: Inline dưới field, red color, icon warning
+- ✅ Validation errors:
+  - Amount = 0 → "Số tiền phải lớn hơn 0"
+  - Amount < 0 → "Số tiền không được âm"
+  - Amount > max → "Số tiền quá lớn (tối đa 999 tỉ)"
+  - Date empty → "Vui lòng chọn ngày"
+  - Date too old → "Ngày không hợp lệ (từ 1900 trở lại)"
+  - Date future → "Ngày không được quá 1 năm trong tương lai"
+  - Category empty → "Vui lòng chọn danh mục"
+  - Description too long → "Mô tả quá dài (tối đa 500 ký tự)"
+- ✅ Save behavior:
+  - Optimistic UI: Hiển thị transaction ngay, show loading indicator
+  - Success → Toast "Đã thêm giao dịch" (3s), close form, refresh list
+  - Network error → Rollback UI, show error modal:
+    "Không thể lưu. Vui lòng kiểm tra kết nối."
+    [Thử lại] [Lưu nháp] [Hủy]
+  - Duplicate detection: Same date + amount + description + type trong vòng 5 phút →
+    Warning: "Giao dịch tương tự đã tồn tại. Tiếp tục?"
+  - DB constraint error → User-friendly message (map technical errors)
+- ✅ Idempotency:
+  - Generate client-side UUID before submit
+  - Server checks UUID, ignore duplicate requests
+  - Retry safe: User clicks Save nhiều lần → only 1 transaction created
+
+**View Transactions:**
 - ✅ User có thể xem danh sách tất cả transactions, sắp xếp theo ngày (mới nhất trước)
+- ✅ List display:
+  - Virtual scrolling nếu > 1000 items (performance requirement)
+  - Pagination: 50 items/page (alternative to virtual scroll)
+  - Empty state: "Chưa có giao dịch nào. [Thêm giao dịch đầu tiên]"
+  - Loading state: Skeleton screens while fetching
+  - Error state: "Không thể tải dữ liệu. [Thử lại]"
+- ✅ Real-time updates:
+  - Supabase subscription to transactions table
+  - New transaction from another device → Auto-insert vào list (smooth animation)
+  - Updated transaction → Update in-place
+  - Deleted transaction → Remove với fade-out animation
+  - Subscription disconnect → Fallback to manual refresh, show indicator
+
+**Update Transaction:**
 - ✅ User có thể edit transaction đã tạo
+- ✅ Edit flow:
+  - Click transaction → Open edit form với pre-filled data
+  - Same validation as Create
+  - Optimistic update: Update UI immediately
+  - Success → Toast "Đã cập nhật" (2s)
+  - Conflict detection:
+    - Transaction deleted by another device → "Giao dịch đã bị xóa. [Tải lại]"
+    - Transaction updated by another device → "Giao dịch đã được cập nhật bởi thiết bị khác."
+      [Đè lên thay đổi của tôi] [Giữ thay đổi mới nhất] [Xem sự khác biệt]
+  - Network error during update → Rollback to old values, allow retry
+  - Validation error → Revert optimistic update, show inline errors
+
+**Delete Transaction:**
 - ✅ User có thể xóa transaction với confirmation dialog
+- ✅ Delete flow:
+  - Click delete → Confirmation modal:
+    "Xóa giao dịch này?"
+    "[Amount] - [Category] - [Date]"
+    [Xóa] [Hủy]
+  - Confirm → Optimistic delete (fade out UI)
+  - Success → Toast "Đã xóa" với [Hoàn tác] button (5 giây timeout)
+  - Undo clicked → Restore transaction, Toast "Đã khôi phục"
+  - Undo timeout → Permanent delete
+  - Network error → Rollback UI, show error "Không thể xóa. [Thử lại]"
+  - Already deleted (concurrent) → "Giao dịch đã bị xóa" (silent, no error)
+
+**Persistence & Sync:**
 - ✅ Dữ liệu được lưu vào Supabase database tự động
+- ✅ Multi-device sync:
+  - User A tạo transaction trên mobile → User B thấy ngay trên desktop (< 1s latency)
+  - Offline mode: Queue operations, sync khi online lại
+  - Conflict resolution: Last-write-wins với server timestamp
+- ✅ Data integrity:
+  - Foreign key constraint: category_id must exist (ON DELETE RESTRICT)
+  - Check constraint: amount > 0 (enforced at DB level)
+  - RLS: user_id = auth.uid() (enforced at DB level)
+
+**Responsive UI:**
 - ✅ UI responsive, hoạt động tốt trên mobile
+- ✅ Responsive requirements:
+  - Mobile (< 640px): Single column, full-width forms, bottom sheet modals
+  - Tablet (640-1024px): 2 columns for list, side panel for forms
+  - Desktop (> 1024px): 3 columns, modal dialogs
+  - Touch targets: ≥ 44x44px (iOS guidelines)
+  - No horizontal scroll at any breakpoint
+  - Form inputs: Auto-focus, appropriate keyboard types (numeric for amount)
+  - Swipe gestures: Swipe left to delete (mobile only, optional)
+
+**Error Handling Pattern (Standardized):**
+- ✅ Network errors: Red toast với retry button, auto-dismiss 5s
+- ✅ Validation errors: Inline below field, red text, persist until fixed
+- ✅ Conflict errors: Modal dialog với options, require user choice
+- ✅ Success messages: Green toast, auto-dismiss 2-3s
+- ✅ Loading states: Skeleton screens, spinners, disable buttons during operation
+
+**Testing Requirements:**
+- ✅ Positive test cases:
+  - Create transaction với valid data (all field combinations)
+  - Update transaction với valid changes
+  - Delete transaction với undo
+  - List rendering với 0, 1, 100, 1000 transactions
+- ✅ Negative test cases:
+  - Amount = 0, negative, > max, non-numeric, too many decimals
+  - Date empty, invalid format, too old, too far future
+  - Category deleted, non-existent, belongs to other user
+  - Description > 500 chars, XSS attempts (<script>alert(1)</script>)
+  - Concurrent edit conflicts
+  - Network failures during CRUD operations
+  - Duplicate detection edge cases
+- ✅ Security test cases:
+  - Create transaction for other user (should fail RLS)
+  - Update/delete transaction of other user (should fail RLS)
+  - SQL injection in description field
+  - XSS in description field
 
 **Technical Notes:**
 - Component: `TransactionForm.vue`, `TransactionList.vue`, `TransactionCard.vue`
 - Store: `stores/transactions.ts` với CRUD methods (Supabase client)
+  - Actions: createTransaction, updateTransaction, deleteTransaction, fetchTransactions
+  - Getters: sortedTransactions, transactionsByDateRange, totalIncome, totalExpense
+  - State: transactions[], loading, error, subscriptionActive
+  - Supabase real-time subscription setup/cleanup
 - Validation: Zod schema cho transaction
+  ```typescript
+  const TransactionSchema = z.object({
+    date: z.date().min(new Date('1900-01-01')).max(addYears(new Date(), 1)),
+    type: z.enum(['income', 'expense']),
+    amount: z.number().positive().max(999999999999.99).multipleOf(0.01),
+    category: z.string().uuid(),
+    description: z.string().max(500).optional(),
+    tags: z.array(z.string().max(50)).max(10).optional()
+  })
+  ```
 - Database: `transactions` table trong Supabase
 - RLS: User chỉ access được transactions của mình
+- Offline queue: LocalStorage để lưu pending operations, sync on reconnect
+- UUID generation: `crypto.randomUUID()` for idempotency
+- Error logging: Log CRUD errors (exclude user data) to monitoring service
 
 ---
 
@@ -167,18 +422,116 @@ interface UserSettings {
 **So that** tôi hiểu rõ tình hình tài chính của mình
 
 **Acceptance Criteria:**
+
+**Summary Cards:**
 - ✅ Hiển thị 3 summary cards: Total Income, Total Expense, Balance (Income - Expense)
+- ✅ Card layout:
+  - Mobile: Stack vertical (1 column)
+  - Tablet/Desktop: Horizontal row (3 columns)
+  - Each card: Icon, label, amount, trend indicator (optional P2)
+- ✅ Number formatting:
+  - VND format: 1.000.000 ₫ (theo user settings)
+  - Negative balance: Red color + minus sign
+  - Positive balance: Green color
+  - Zero: Gray color
+  - Max displayable: 999,999,999,999.99 (sau đó show "999+ tỉ")
+
+**Time Period Selection:**
 - ✅ Có thể chọn time period: Daily, Weekly, Monthly
+- ✅ Period definitions:
+  - Daily: Single day (current day by default)
+  - Weekly: Mon-Sun (current week by default, ISO 8601)
+  - Monthly: First-Last day of month (current month by default)
+- ✅ Period selector UI:
+  - Tab buttons hoặc dropdown
+  - Active period highlighted
+  - Persist selection in localStorage
+
+**Date Navigation:**
 - ✅ Có date navigation (prev/next) cho period đã chọn
+- ✅ Navigation controls:
+  - Previous button (arrow left)
+  - Current period label (e.g., "12 Dec 2025", "Week 50, 2025", "Dec 2025")
+  - Next button (arrow right, disabled if future)
+  - Today/This Week/This Month button (reset to current)
+- ✅ Keyboard shortcuts:
+  - Left arrow: Previous period
+  - Right arrow: Next period
+  - T: Today/This period
+
+**Real-time Updates:**
 - ✅ Summary tự động update khi có transaction mới
+- ✅ Update behavior:
+  - Supabase subscription: Listen to transactions insert/update/delete
+  - Update latency: < 1s from server event to UI update
+  - Animation: Count-up animation for amount changes (optional)
+  - Conflict: Multiple devices → Server timestamp wins
+  - Subscription disconnect → Show warning "Mất kết nối. [Tải lại]", fallback to manual refresh
+
+**Display Formatting:**
 - ✅ Hiển thị số liệu với format VND đúng (1.000.000 ₫)
+- ✅ Format rules:
+  - Separator: "." (dot) for thousands (respects user settings)
+  - Decimal: "," (comma) for decimals (2 places, hide if .00)
+  - Currency symbol: ₫ (after amount)
+  - Negative: "-1.000.000 ₫" (red color)
+
+**Empty State:**
 - ✅ Empty state khi chưa có transactions
+- ✅ Empty state UI:
+  - Illustration/icon
+  - Message: "Chưa có giao dịch nào trong [period]"
+  - CTA button: "Thêm giao dịch đầu tiên"
+  - All cards show: 0 ₫
+
+**Error Handling:**
+- ✅ Data fetch errors:
+  - Network error → Toast "Không thể tải dữ liệu. [Thử lại]"
+  - DB error → Show cached data (if available) + warning banner
+- ✅ Loading state:
+  - Skeleton cards while initial fetch
+  - Shimmer animation
+  - Max wait: 5s → timeout error
+
+**Performance Requirements:**
+- ✅ Initial render: < 500ms (with cached data)
+- ✅ Period switch: < 200ms (recalculate summaries)
+- ✅ Real-time update: < 1s from event to UI
+
+**Testing Requirements:**
+- ✅ Positive tests:
+  - Summary calculation correctness (income, expense, balance)
+  - Period switching (Daily/Weekly/Monthly)
+  - Date navigation (prev/next/today)
+  - Real-time updates on transaction changes
+- ✅ Edge cases:
+  - Empty transactions → Show 0 values
+  - Negative balance → Red color, correct format
+  - Large amounts (> 999 triệu) → Correct format
+  - Period with no transactions → Show 0
+  - Future period → Disable next button
 
 **Technical Notes:**
 - Page: `pages/index.vue` (Dashboard)
-- Components: `StatCard.vue`, `PeriodSelector.vue`
+- Components: `StatCard.vue`, `PeriodSelector.vue`, `DateNavigator.vue`
 - Composable: `useDateRange.ts` để tính toán time periods
+  - getPeriodRange(type, offset): Return { start, end } dates
+  - formatPeriodLabel(type, date): Format display label
+  - isCurrentPeriod(type, date): Check if period is current
 - Store getters: `totalIncome`, `totalExpense`, `balance` với date filtering
+  ```typescript
+  getters: {
+    totalIncome: (state) => (startDate: Date, endDate: Date) => {
+      return state.transactions
+        .filter(t => t.type === 'income' && t.date >= startDate && t.date <= endDate)
+        .reduce((sum, t) => sum + t.amount, 0)
+    },
+    // Similar for totalExpense, balance
+  }
+  ```
+- Supabase subscription: transactions table (filtered by user_id)
+- LocalStorage: Save selected period preference
+- Number formatting: Use Intl.NumberFormat với user locale settings
 
 ---
 
@@ -188,12 +541,84 @@ interface UserSettings {
 **So that** tôi dễ dàng nhận biết pattern chi tiêu
 
 **Acceptance Criteria:**
+
+**Line/Bar Chart - Income vs Expense:**
 - ✅ Line/Bar chart: Income vs Expense theo thời gian (theo period đã chọn)
+- ✅ Chart specifications:
+  - Chart type: Combination (Line for trend + Bar for comparison)
+  - X-axis: Time labels (days/weeks/months based on selected period)
+  - Y-axis: Amount in VND (auto-scale, show currency symbol)
+  - Data series: 2 lines/bars (Income = green, Expense = red)
+  - Gridlines: Horizontal only, subtle gray
+  - Zero line: Bold, distinct color
+- ✅ Period-based rendering:
+  - Daily: Show hourly breakdown (0-23h, aggregate transactions)
+  - Weekly: Show daily breakdown (Mon-Sun, 7 data points)
+  - Monthly: Show daily breakdown (1-31, up to 31 data points)
+- ✅ Data aggregation:
+  - Group transactions by time bucket
+  - Calculate sum for each bucket
+  - Handle sparse data (days with no transactions → show 0)
+
+**Pie/Doughnut Chart - Category Breakdown:**
 - ✅ Pie/Doughnut chart: Phân bổ theo categories (cho expense)
+- ✅ Chart specifications:
+  - Chart type: Doughnut (better readability)
+  - Slices: One per category (max 15, group "Others" if more)
+  - Colors: Use category.color from database
+  - Center text: Total expense amount
+  - Slice labels: Category name + percentage
+  - Minimum slice size: 1% (smaller → group into "Others")
+- ✅ Interactivity:
+  - Click slice → Filter transactions by that category
+  - Hover → Highlight slice, show tooltip
+
+**Responsive Charts:**
 - ✅ Charts responsive, hiển thị tốt trên mobile
+- ✅ Responsive specifications:
+  - Mobile (< 640px): Single column, aspect ratio 16:9, font size 10px
+  - Tablet (640-1024px): 2 columns (line + pie side-by-side), aspect 4:3, font 12px
+  - Desktop (> 1024px): 2 columns, aspect 16:9, font 14px
+  - Touch support: Pinch to zoom (optional), tap to interact
+  - No horizontal scroll: Charts scale to container width
+  - Legend: Below chart on mobile, right side on desktop
+  - Min chart height: 200px, max: 500px
+
+**Real-time Updates:**
 - ✅ Charts update real-time khi có thay đổi data
+- ✅ Update specifications:
+  - Supabase subscription: Listen to transactions table changes
+  - Update latency: < 1s from event to chart re-render
+  - Animation: Smooth transition (300ms) when data changes
+  - Throttling: Max 1 update/second (batch multiple rapid changes)
+  - Subscription disconnect → Fallback to manual refresh button
+
+**Tooltip Information:**
 - ✅ Tooltip hiển thị đầy đủ thông tin khi hover
+- ✅ Tooltip content:
+  - Line/Bar chart: "[Date]: Thu [amount] ₫, Chi [amount] ₫"
+  - Pie chart: "[Category]: [amount] ₫ ([percentage]%)"
+  - Tooltip position: Follow cursor, avoid screen edges
+  - Tooltip styling: White background, shadow, rounded corners
+
+**Legend & Labels:**
 - ✅ Legend để phân biệt income/expense
+- ✅ Legend specifications:
+  - Items: Income (green), Expense (red)
+  - Interactive: Click to hide/show series
+  - Position: Bottom on mobile, right on desktop
+  - Labels: Vietnamese ("Thu nhập", "Chi tiêu")
+
+**Empty State:**
+- ✅ Empty state khi không có data:
+  - Message: "Không có dữ liệu trong khoảng thời gian này"
+  - Illustration: Empty chart placeholder
+  - CTA: "Thêm giao dịch"
+
+**Performance Requirements:**
+- ✅ Chart rendering: < 500ms (for up to 1000 data points)
+- ✅ Interaction latency: < 100ms (hover, click responses)
+- ✅ Animation frame rate: 60 FPS (smooth transitions)
 
 **Technical Notes:**
 - Component: `DashboardChart.vue`, `CategoryChart.vue`
