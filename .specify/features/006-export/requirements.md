@@ -35,7 +35,7 @@ Export transactions data to CSV file for backup or external analysis.
 - `ExportButton.vue`: Export trigger
 
 ### Utilities
-- `utils/csv-export.ts`: CSV generation with PapaParse
+- `app/utils/csv-export.ts`: CSV generation with PapaParse
 
 ### Browser API
 - Blob and URL.createObjectURL for download

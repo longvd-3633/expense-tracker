@@ -42,7 +42,7 @@ Import transactions from CSV files for data migration or backup restoration.
 - `ImportPreview.vue`: Data preview modal
 
 ### Utilities
-- `utils/csv-import.ts`: CSV parsing with PapaParse
+- `app/utils/csv-import.ts`: CSV parsing with PapaParse
 
 ### Validation
 - Zod schema for transaction validation

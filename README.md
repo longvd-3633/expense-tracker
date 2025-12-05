@@ -1,156 +1,322 @@
 # Expense Tracker
 
-Ứng dụng web theo dõi thu/chi cá nhân, giúp quản lý tài chính, phân loại giao dịch và xem báo cáo chi tiêu.
+A modern web application for tracking personal income and expenses built with Nuxt 3, TypeScript, TailwindCSS, and Supabase.
 
-## 🚀 Tech Stack
+## Features
 
-- **Nuxt 3** - Vue 3 framework với SSR/SSG
-- **TypeScript** - Type safety
-- **TailwindCSS** - Utility-first CSS
-- **Pinia** - State management
+- 🔐 **User Authentication** - Secure email/password authentication with Supabase
+- 💰 **Transaction Management** - Create, read, update, and delete income/expense transactions
+- 📊 **Dashboard Overview** - View financial summaries with customizable time periods
+- 📈 **Data Visualization** - Interactive charts for income vs expense trends
+- 🔍 **Advanced Filtering** - Search and filter transactions by multiple criteria
+- 📤 **CSV Export** - Export transaction data to CSV format
+- ⚙️ **User Settings** - Customize date format, currency, theme, and more
+- 🏷️ **Custom Categories** - Create and manage your own expense/income categories
+- 🔄 **Real-time Sync** - Data syncs across devices automatically
+- 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
+
+## Tech Stack
+
+### Core
+- **Nuxt 3** - Full-stack Vue.js framework
+- **TypeScript 5.x** - Type-safe development
+- **Vue 3** - Progressive JavaScript framework
+
+### UI & Styling
+- **TailwindCSS 3.x** - Utility-first CSS framework
+- **Chart.js 4.x** - Data visualization
+- **vue-chartjs 5.x** - Vue wrapper for Chart.js
+
+### Backend & Database
+- **Supabase** - Backend as a Service
+  - PostgreSQL database
+  - Authentication & authorization
+  - Row Level Security (RLS)
+  - Real-time subscriptions
+
+### State Management & Utilities
+- **Pinia 2.x** - Vue state management
 - **VueUse** - Composition utilities
-- **date-fns** - Date manipulation
-- **Chart.js** - Data visualization
-- **PapaParse** - CSV export/import
+- **date-fns 4.x** - Date manipulation
+- **Zod 4.x** - Schema validation
+- **PapaParse 5.x** - CSV parsing
 
-## 📋 Features
+### Speckit SDD Artifacts
 
-### ✅ Đã hoàn thành (MVP - P1)
+Project-wide specification assets are organized under `specs/000-expense-tracker/`:
 
-- ✅ **Transaction Management**: Thêm, xem, sửa, xóa transactions
-- ✅ **Dashboard**: Tổng quan thu/chi với summary cards
-- ✅ **Time Periods**: Xem theo ngày/tuần/tháng với navigation
-- ✅ **Categories**: Hệ thống phân loại với 14 categories mặc định
-- ✅ **CSV Export**: Export transactions sang CSV file
-- ✅ **LocalStorage**: Lưu trữ dữ liệu persistent
-- ✅ **Settings**: Tùy chỉnh currency, date format, number format
-- ✅ **Responsive Design**: Mobile-first design với TailwindCSS
+- `spec.md` – high-level requirements
+- `plan.md` – implementation plan and architecture
+- `tasks.md` – cross-feature task backlog
+- `checklist.md` plus `checklists/` – quality gate reviews
 
-### 🔨 Đang phát triển (P2)
+## Prerequisites
 
-- 🔨 Filter & Search transactions
-- 🔨 Data visualization với Charts
-- 🔨 Category breakdown charts
+- Node.js 18.x or higher
+- npm or yarn
+- Supabase account (free tier available at [supabase.com](https://supabase.com))
 
-### 📌 Kế hoạch tương lai (P3)
+## Getting Started
 
-- Custom categories management
-- CSV Import
-- Recurring transactions
-- Budget tracking
-- Cloud sync
+### 1. Clone the Repository
 
-## 🛠️ Setup
+\`\`\`bash
+git clone <repository-url>
+cd expense-tracker
+\`\`\`
 
-Make sure to install dependencies:
+### 2. Install Dependencies
 
-```bash
+\`\`\`bash
 npm install
-```
+\`\`\`
 
-## Development Server
+### 3. Setup Supabase
 
-Start the development server on `http://localhost:3000`:
+#### 3.1 Create a Supabase Project
 
-```bash
+1. Go to [supabase.com](https://supabase.com) and sign up/login
+2. Click "New Project"
+3. Fill in project details:
+   - **Name**: expense-tracker (or your preferred name)
+   - **Database Password**: Create a strong password (save it securely)
+   - **Region**: Choose closest to your location
+4. Wait for project creation (~2 minutes)
+
+#### 3.2 Get API Credentials
+
+1. In your Supabase project dashboard, go to **Settings** → **API**
+2. Copy the following values:
+   - **Project URL** (e.g., `https://xxxxx.supabase.co`)
+   - **anon public key** (long string starting with `eyJ...`)
+
+#### 3.3 Configure Environment Variables
+
+1. Open the \`.env\` file in your project root
+2. Replace the placeholder values:
+
+\`\`\`env
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_KEY=your-anon-public-key-here
+\`\`\`
+
+### 4. Run Database Migration
+
+1. In Supabase dashboard, go to **SQL Editor**
+2. Click **New Query**
+3. Copy the entire contents of \`supabase/migrations/001_initial_schema.sql\`
+4. Paste into the SQL Editor
+5. Click **Run** button
+6. Verify success - you should see tables created in the **Table Editor**
+
+**Expected Tables:**
+- \`categories\` - Default income/expense categories
+- \`transactions\` - User transactions
+- \`user_settings\` - User preferences
+
+### 5. Configure Email Authentication
+
+1. In Supabase dashboard, go to **Authentication** → **Providers**
+2. Find **Email** provider (should be enabled by default)
+3. Optional: Configure email templates under **Authentication** → **Email Templates**
+
+### 6. Start Development Server
+
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
-Open browser at `http://localhost:3000`
+The application will be available at [http://localhost:3000](http://localhost:3000)
 
-## Build for Production
+## Project Structure
 
-```bash
-# Build application
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-## 📁 Project Structure
-
-```
+\`\`\`
 expense-tracker/
-├── assets/css/main.css             # TailwindCSS imports
-├── composables/
-│   ├── useCSVExport.ts             # CSV export logic
-│   ├── useDateRange.ts             # Date range utilities
-│   └── useFormatters.ts            # Currency/date formatters
-├── layouts/default.vue             # Main layout with navigation
-├── pages/
-│   ├── index.vue                   # Dashboard page
-│   ├── transactions/index.vue      # Transactions list page
-│   └── settings.vue                # Settings page
-├── stores/
-│   ├── categories.ts               # Categories Pinia store
-│   ├── transactions.ts             # Transactions Pinia store
-│   └── settings.ts                 # Settings Pinia store
-├── types/
-│   ├── category.ts                 # Category interfaces & defaults
-│   └── transaction.ts              # Transaction interfaces
-├── nuxt.config.ts                  # Nuxt configuration
-├── spec.md                         # Full specification (SDD)
-└── README.md
-```
+├── app/                    # Nuxt 4 app directory
+│   ├── app.vue            # Root component
+│   ├── components/        # Vue components
+│   │   ├── atoms/        # Basic UI elements
+│   │   ├── molecules/    # Composite components
+│   │   └── organisms/    # Complex components
+│   ├── composables/      # Composition functions
+│   │   ├── useAuth.ts   # Authentication logic
+│   │   ├── useFormatters.ts # Format utilities
+│   │   └── ...
+│   ├── layouts/          # Page layouts
+│   ├── middleware/       # Route middleware
+│   │   └── auth.ts      # Authentication guard
+│   ├── pages/            # Application pages
+│   │   ├── index.vue    # Dashboard
+│   │   ├── login.vue    # Login page
+│   │   ├── register.vue # Registration page
+│   │   └── transactions/ # Transaction management
+│   ├── stores/           # Pinia stores
+│   │   ├── transactions.ts # Transaction state
+│   │   ├── categories.ts   # Category state
+│   │   └── settings.ts     # User settings
+│   ├── types/            # TypeScript types
+│   │   ├── transaction.ts
+│   │   ├── category.ts
+│   │   ├── user.ts
+│   │   └── index.ts
+│   └── utils/            # Utility functions
+├── assets/                 # Static assets
+│   └── css/               # Global styles
+├── supabase/              # Supabase configuration
+│   └── migrations/        # Database migrations
+├── .env                   # Environment variables (not in git)
+├── .env.example           # Environment template
+├── nuxt.config.ts         # Nuxt configuration
+├── tailwind.config.ts     # Tailwind configuration
+└── package.json           # Dependencies
+\`\`\`
 
-## 💾 Data Storage
+## Development Workflow
 
-Ứng dụng sử dụng **LocalStorage** để lưu trữ dữ liệu phía client:
+### Phase 1: Setup ✅ (Complete)
+- [x] Project initialization
+- [x] Dependencies installation
+- [x] Type definitions
+- [x] Tailwind configuration
 
-- `expense-tracker:transactions` - Danh sách transactions
-- `expense-tracker:categories` - Danh sách categories
-- `expense-tracker:settings` - User settings
+### Phase 2: Authentication ✅ (Code Complete - Manual Setup Required)
+- [x] Database migration file created
+- [x] Authentication middleware
+- [x] Login/Register pages
+- [x] Password reset flow
+- [ ] **Requires Supabase project setup** (see Step 3 above)
 
-**Note**: Dữ liệu chỉ tồn tại trên browser. Backup bằng cách export CSV.
+### Phase 3: Transaction Management (Next)
+- [ ] Transaction CRUD operations
+- [ ] Pinia stores
+- [ ] Transaction form & list components
+- [ ] Real-time sync
 
-## 🎨 Default Categories
+### Phase 4: Dashboard (MVP)
+- [ ] Summary cards
+- [ ] Period selection
+- [ ] Date navigation
 
-### Income (Thu nhập)
-- Lương • Kinh doanh • Đầu tư • Quà tặng • Thu nhập khác
+### Phase 5: Charts (MVP)
+- [ ] Income vs Expense chart
+- [ ] Category breakdown chart
 
-### Expense (Chi tiêu)
-- Ăn uống • Di chuyển • Nhà ở • Tiện ích • Y tế • Giải trí • Mua sắm • Giáo dục • Chi phí khác
+### Phases 6-10: Enhanced Features
+- [ ] Filter & Search
+- [ ] CSV Export
+- [ ] User Settings
+- [ ] Custom Categories
+- [ ] Polish & Deployment
 
-## 📝 Usage Guide
+## Testing Authentication
 
-### Thêm Transaction
-1. Vào **Transactions** → Click **"+ Thêm giao dịch"**
-2. Chọn loại (Thu/Chi), nhập số tiền, danh mục, ngày, mô tả
-3. Click **"Thêm"**
+### Manual Test Flow
 
-### Xem Dashboard
-1. Vào **Dashboard** → Chọn period (Ngày/Tuần/Tháng)
-2. Dùng ← → để navigate
-3. Xem summary: Tổng thu, Tổng chi, Số dư
+1. **Register New User**
+   - Visit http://localhost:3000/register
+   - Enter email and password (min 8 chars, 1 uppercase, 1 lowercase, 1 number)
+   - Check email for verification link
+   - Click verification link
 
-### Export CSV
-1. Vào **Transactions** → Click **"Export CSV"**
-2. File tự động download
+2. **Login**
+   - Visit http://localhost:3000/login
+   - Enter verified credentials
+   - Should redirect to dashboard
 
-### Settings
-1. Vào **Settings**
-2. Tùy chỉnh: Currency, Date format, Number format, Default view
+3. **Test Protected Routes**
+   - Try accessing http://localhost:3000 without login → should redirect to login
+   - Login → should access dashboard successfully
 
-## 🧪 Development Notes
+4. **Password Reset**
+   - Visit http://localhost:3000/forgot-password
+   - Enter email
+   - Check email for reset link
 
-### SDD Workflow
-- **Spec-first**: `spec.md` chứa tất cả user stories
-- **Priority-based**: P1 → P2 → P3
-- **Incremental**: Mỗi feature hoàn thành độc lập
+## Useful Commands
 
-### Code Style
-- TypeScript strict mode
-- Composition API (Vue 3)
-- Auto-imports (Nuxt 3)
-- TailwindCSS utilities
+\`\`\`bash
+# Development
+npm run dev              # Start dev server
+npm run build            # Build for production
+npm run preview          # Preview production build
 
-## 📄 License
+# Code Quality
+npm run typecheck        # Run TypeScript type checking
+npm run lint             # Run ESLint (if configured)
+
+# Database
+# Run migrations in Supabase SQL Editor
+# File: supabase/migrations/001_initial_schema.sql
+\`\`\`
+
+## Environment Variables
+
+Create a \`.env\` file with these variables:
+
+\`\`\`env
+SUPABASE_URL=your-supabase-project-url
+SUPABASE_KEY=your-supabase-anon-key
+\`\`\`
+
+**Security Notes:**
+- Never commit \`.env\` to version control
+- The \`.env.example\` file is for reference only
+- Use strong passwords for Supabase database
+
+## Troubleshooting
+
+### Supabase Connection Issues
+
+**Problem**: "Failed to fetch" or "Network error"
+
+**Solutions**:
+1. Verify \`SUPABASE_URL\` and \`SUPABASE_KEY\` in \`.env\`
+2. Check Supabase project status in dashboard
+3. Ensure project is not paused (free tier pauses after inactivity)
+4. Restart dev server after changing \`.env\`
+
+### Email Verification Not Received
+
+**Solutions**:
+1. Check spam/junk folder
+2. In Supabase: **Authentication** → **Email Templates** → Verify settings
+3. For development: Use a real email address (not temporary/disposable)
+4. Check Supabase logs: **Logs** → **Auth Logs**
+
+### TypeScript Errors
+
+**Problem**: Type errors during development
+
+**Solutions**:
+1. Run \`npm run typecheck\` to see all errors
+2. Restart VS Code TypeScript server: Cmd+Shift+P → "TypeScript: Restart TS Server"
+3. Delete \`.nuxt\` folder and restart dev server
+
+### Database Migration Failed
+
+**Solutions**:
+1. Check if tables already exist (run migration only once)
+2. Verify SQL syntax in migration file
+3. Check Supabase SQL Editor for error messages
+4. Try running sections separately (tables, then RLS, then triggers, then seed data)
+
+## Contributing
+
+This is a personal finance tracking application. Contributions are welcome!
+
+## License
 
 MIT
 
+## Support
+
+For issues and questions:
+1. Check this README thoroughly
+2. Review Supabase documentation
+3. Check Nuxt 3 documentation
+4. Open an issue in the repository
+
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: December 4, 2025
+**Built with ❤️ using Nuxt 3, TypeScript, TailwindCSS, and Supabase**
 

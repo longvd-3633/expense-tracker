@@ -31,10 +31,10 @@ User preferences and application settings customization.
 ## Technical Implementation
 
 ### Pages
-- `pages/settings.vue`: Settings page
+- `app/pages/settings.vue`: Settings page
 
 ### Store
-- `stores/settings.ts`: Settings state
+- `app/stores/settings.ts`: Settings state
 
 ### Composables
 - `useFormatters.ts`: Formatting utilities using settings

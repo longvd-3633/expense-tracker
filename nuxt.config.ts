@@ -7,7 +7,31 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@vueuse/nuxt',
+    '@nuxtjs/supabase',
   ],
+
+  supabase: {
+    redirect: false,
+  },
+
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    },
+  },
+
+  ssr: true,
+
+  vite: {
+    optimizeDeps: {
+      include: ['date-fns', 'chart.js', 'papaparse', 'zod']
+    },
+    resolve: {
+      alias: {
+        '@supabase/supabase-js': '@supabase/supabase-js/dist/module/index.js',
+      },
+    },
+  },
 
   app: {
     head: {
