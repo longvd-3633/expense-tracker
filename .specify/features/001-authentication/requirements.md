@@ -348,7 +348,7 @@ export default defineNuxtConfig({
 ### Tech-002: Middleware Implementation
 
 ```typescript
-// middleware/auth.ts
+// app/middleware/auth.ts
 export default defineNuxtRouteMiddleware((to, from) => {
   const user = useSupabaseUser()
   
@@ -376,7 +376,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
 ### Tech-003: Auth Composable
 
 ```typescript
-// composables/useAuth.ts
+// app/composables/useAuth.ts
 export const useAuth = () => {
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
@@ -498,7 +498,7 @@ function mapAuthError(error: any): Error {
 ### Tech-004: Validation Schema
 
 ```typescript
-// utils/validation.ts
+// app/utils/validation.ts
 import { z } from 'zod'
 
 export const emailSchema = z

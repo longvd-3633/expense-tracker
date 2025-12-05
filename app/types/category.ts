@@ -1,10 +1,11 @@
 export interface Category {
-  id: string;
-  name: string;
+  id: string;                    // UUID
+  userId?: string;               // User ID (null for default categories)
+  name: string;                  // Category name
   type: 'income' | 'expense' | 'both';
-  color: string;
-  icon?: string;
-  isDefault: boolean;
+  color: string;                 // Hex color code
+  icon?: string;                 // Icon name
+  isDefault: boolean;            // System default vs user-created
 }
 
 export const DEFAULT_CATEGORIES: Category[] = [

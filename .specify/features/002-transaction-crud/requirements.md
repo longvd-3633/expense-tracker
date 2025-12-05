@@ -463,7 +463,7 @@ Quản lý giao dịch thu/chi hoàn chỉnh với CRUD operations (Create, Read
 ### Tech-010: Data Model
 
 ```typescript
-// types/transaction.ts
+// app/types/transaction.ts
 export interface Transaction {
   id: string                     // UUID
   userId: string                 // User ID (from Supabase Auth)
@@ -490,7 +490,7 @@ export interface TransactionFormData {
 ### Tech-011: Validation Schema
 
 ```typescript
-// utils/validation.ts
+// app/utils/validation.ts
 import { z } from 'zod'
 import { addYears } from 'date-fns'
 
@@ -524,7 +524,7 @@ export const transactionFormSchema = transactionSchema.extend({
 ### Tech-012: Pinia Store
 
 ```typescript
-// stores/transactions.ts
+// app/stores/transactions.ts
 import { defineStore } from 'pinia'
 import type { Transaction } from '~/types/transaction'
 

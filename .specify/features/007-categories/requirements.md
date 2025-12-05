@@ -33,14 +33,14 @@ Management of transaction categories including default and custom categories.
 ## Technical Implementation
 
 ### Pages
-- `pages/categories/index.vue`: Category management page
+- `app/pages/categories/index.vue`: Category management page
 
 ### Components
 - `CategoryForm.vue`: Add/edit form
 - `ColorPicker.vue`: Color selection
 
 ### Store
-- `stores/categories.ts`: Category state management
+- `app/stores/categories.ts`: Category state management
 
 ## Testing Requirements
 - CRUD operations for categories

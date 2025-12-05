@@ -245,10 +245,10 @@ Each feature requirements document should include:
 
 ## References
 
-- **Main Spec**: `/spec.md` (high-level overview)
-- **Overall Plan**: `/plan.md` (architecture, tech stack)
-- **Tasks**: `/tasks.md` (implementation tasks across all features)
-- **Checklist**: `/checklist.md` (quality gate validation)
+- **Main Spec**: `/specs/000-expense-tracker/spec.md` (high-level overview)
+- **Overall Plan**: `/specs/000-expense-tracker/plan.md` (architecture, tech stack)
+- **Tasks**: `/specs/000-expense-tracker/tasks.md` (implementation tasks across all features)
+- **Checklist**: `/specs/000-expense-tracker/checklist.md` (quality gate validation)
 - **Constitution**: `/constitution.md` (project principles)
 
 ---
