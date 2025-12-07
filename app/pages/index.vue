@@ -1,13 +1,30 @@
 <script setup lang="ts">
-definePageMeta({
-  middleware: 'auth',
-})
-
 const transactionsStore = useTransactionsStore()
 const categoriesStore = useCategoriesStore()
-const { dateRange } = useDateRange()
+const {
+  currentPeriod,
+  dateRange,
+  setPeriod,
+  goToPrevious,
+  goToNext,
+  goToToday,
+  viewingCurrentPeriod,
+  canGoToNext,
+  periodLabel,
+} = useDateRange()
+
+const { formatCurrency } = useFormatters()
 
 const isLoading = ref(true)
+const reconnecting = ref(false)
+
+const rangeFormatter = new Intl.DateTimeFormat('vi-VN', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+})
+
+const rangeLabel = computed(() => `${rangeFormatter.format(dateRange.value.start)} – ${rangeFormatter.format(dateRange.value.end)}`)
 
 onMounted(async () => {
   try {
@@ -15,142 +32,337 @@ onMounted(async () => {
       categoriesStore.fetchCategories(),
       transactionsStore.fetchTransactions(),
     ])
+    transactionsStore.ensureSubscription()
   } catch (error) {
-    console.error('Error loading data:', error)
+    console.error('Error loading dashboard data:', error)
   } finally {
     isLoading.value = false
   }
 })
 
-// Calculate stats
-const stats = computed(() => {
-  const filtered = transactionsStore.getTransactionsByDateRange(
+const filteredTransactions = computed(() =>
+  transactionsStore.getTransactionsByDateRange(
     dateRange.value.start,
-    dateRange.value.end
+    dateRange.value.end,
   )
+)
 
-  const income = filtered
-    .filter((t) => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0)
+const stats = computed(() => {
+  const transactions = filteredTransactions.value
+  const incomeTransactions = transactions.filter((t) => t.type === 'income')
+  const expenseTransactions = transactions.filter((t) => t.type === 'expense')
 
-  const expense = filtered
-    .filter((t) => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0)
+  const income = incomeTransactions.reduce((sum, t) => sum + t.amount, 0)
+  const expense = expenseTransactions.reduce((sum, t) => sum + t.amount, 0)
 
   return {
     income,
     expense,
     balance: income - expense,
-    count: filtered.length,
+    count: transactions.length,
+    incomeCount: incomeTransactions.length,
+    expenseCount: expenseTransactions.length,
   }
 })
 
-const { formatCurrency } = useFormatters()
+const incomeShare = computed(() => {
+  const total = stats.value.income + stats.value.expense
+  if (total === 0) return 0
+  return Math.round((stats.value.income / total) * 100)
+})
+
+const expenseShare = computed(() => 100 - incomeShare.value)
+
+const statCards = computed(() => {
+  const { income, expense, balance, incomeCount, expenseCount } = stats.value
+  const incomeAvg = incomeCount ? income / incomeCount : 0
+  const expenseAvg = expenseCount ? expense / Math.max(expenseCount, 1) : 0
+
+  return [
+    {
+      key: 'income',
+      label: 'Thu nhập',
+      amount: income,
+      variant: 'income' as const,
+      chipLabel: incomeCount ? `${incomeCount} giao dịch` : 'Chưa có giao dịch',
+      description: incomeCount
+        ? `TB ${formatCurrency(incomeAvg)} / giao dịch`
+        : 'Ghi nhận thu nhập để xem thống kê',
+    },
+    {
+      key: 'expense',
+      label: 'Chi tiêu',
+      amount: expense,
+      variant: 'expense' as const,
+      chipLabel: expenseCount ? `${expenseCount} giao dịch` : 'Chưa có giao dịch',
+      description: expenseCount
+        ? `TB ${formatCurrency(expenseAvg)} / giao dịch`
+        : 'Ghi nhận chi phí để xem thống kê',
+    },
+    {
+      key: 'balance',
+      label: 'Còn lại',
+      amount: balance,
+      variant: 'balance' as const,
+      chipLabel: `Khoảng: ${rangeLabel.value}`,
+      description:
+        balance >= 0
+          ? 'Bạn đang thặng dư trong giai đoạn này'
+          : 'Chi vượt thu · cân nhắc cắt giảm',
+    },
+  ]
+})
+
+type ChartGranularity = 'hour' | 'day'
+
+const chartGranularity = computed<ChartGranularity>(() =>
+  currentPeriod.value === 'daily' ? 'hour' : 'day'
+)
+
+const incomeBuckets = computed(() =>
+  transactionsStore.getIncomeByDate(
+    dateRange.value.start,
+    dateRange.value.end,
+    chartGranularity.value,
+  )
+)
+
+const expenseBuckets = computed(() =>
+  transactionsStore.getExpenseByDate(
+    dateRange.value.start,
+    dateRange.value.end,
+    chartGranularity.value,
+  )
+)
+
+const rawLineChartData = computed(() => ({
+  labels: incomeBuckets.value.map(bucket => bucket.label),
+  income: incomeBuckets.value.map(bucket => bucket.total),
+  expense: expenseBuckets.value.map(bucket => bucket.total),
+}))
+
+const lineChartData = ref(rawLineChartData.value)
+const syncLineChartData = useThrottleFn((payload: typeof rawLineChartData.value) => {
+  lineChartData.value = payload
+}, 1000, true)
+
+watch(
+  rawLineChartData,
+  value => {
+    syncLineChartData(value)
+  },
+  { deep: true, immediate: true }
+)
+
+type StoreCategoryBreakdown = {
+  categoryId: string | null | 'others'
+  total: number
+  isOthers?: boolean
+}
+
+type CategoryChartSlice = {
+  label: string
+  value: number
+  color: string
+  categoryId?: string | null
+  isOthers?: boolean
+}
+
+const expenseByCategory = computed<StoreCategoryBreakdown[]>(() =>
+  transactionsStore.getExpenseByCategory(dateRange.value.start, dateRange.value.end)
+)
+
+const rawCategorySlices = computed<CategoryChartSlice[]>(() =>
+  expenseByCategory.value.map(entry => {
+    if (entry.isOthers) {
+      return {
+        label: 'Khác',
+        value: entry.total,
+        color: '#CBD5F5',
+        categoryId: entry.categoryId,
+        isOthers: true,
+      }
+    }
+
+    const category = entry.categoryId ? categoriesStore.getCategoryById(entry.categoryId) : null
+    return {
+      label: category?.name ?? 'Danh mục không xác định',
+      value: entry.total,
+      color: category?.color ?? '#E2E8F0',
+      categoryId: entry.categoryId,
+    }
+  })
+)
+
+const categoryChartSlices = ref<CategoryChartSlice[]>(rawCategorySlices.value)
+const syncCategorySlices = useThrottleFn((payload: CategoryChartSlice[]) => {
+  categoryChartSlices.value = payload
+}, 1000, true)
+
+watch(
+  rawCategorySlices,
+  value => {
+    syncCategorySlices(value)
+  },
+  { deep: true, immediate: true }
+)
+
+const handleReconnect = async () => {
+  if (reconnecting.value) return
+  reconnecting.value = true
+  try {
+    transactionsStore.disposeSubscription()
+    await transactionsStore.fetchTransactions()
+    transactionsStore.ensureSubscription()
+  } catch (error) {
+    console.error('Không thể kết nối lại realtime:', error)
+  } finally {
+    reconnecting.value = false
+  }
+}
 </script>
 
 <template>
-  <div>
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-      <p class="text-gray-600">Tổng quan tài chính của bạn</p>
+  <div class="space-y-6">
+    <header class="mb-2">
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-blue-500">Tổng quan</p>
+      <h1 class="mt-2 text-3xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-gray-600">Tình hình tài chính của bạn · {{ periodLabel }}</p>
+    </header>
+
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <PeriodSelector :model-value="currentPeriod" @update:model-value="setPeriod" />
+
+        <DateNavigator :label="periodLabel" :can-go-next="canGoToNext" :disable-today="viewingCurrentPeriod"
+          :is-current-period="viewingCurrentPeriod" @previous="goToPrevious" @next="goToNext" @today="goToToday">
+          <template #meta>
+            <p class="mt-1 text-xs text-gray-500">{{ rangeLabel }}</p>
+          </template>
+        </DateNavigator>
+      </div>
+      <p class="mt-4 text-xs text-gray-400">
+        Phím tắt: ← kỳ trước · → kỳ tiếp · T quay về hôm nay
+      </p>
+    </section>
+
+    <div v-if="transactionsStore.realtimeDisconnected"
+      class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold">Mất kết nối realtime</p>
+          <p class="text-amber-800">Dữ liệu vẫn khả dụng nhưng sẽ không tự cập nhật cho tới khi kết nối lại.</p>
+        </div>
+      </div>
+      <button type="button"
+        class="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 transition hover:border-amber-400 disabled:opacity-60"
+        :disabled="reconnecting" @click="handleReconnect">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 10-3.87 7.19" />
+          <path d="M21 3v5h-5" />
+        </svg>
+        {{ reconnecting ? 'Đang kết nối lại…' : 'Kết nối lại' }}
+      </button>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div v-for="i in 3" :key="i" class="bg-white rounded-lg shadow p-6 animate-pulse">
-        <div class="h-4 bg-gray-200 rounded w-1/2 mb-4" />
-        <div class="h-8 bg-gray-200 rounded w-3/4" />
+    <section v-if="isLoading" class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div v-for="i in 3" :key="i" class="rounded-2xl bg-white p-6 shadow-sm">
+        <div class="h-4 w-1/2 rounded bg-gray-100" />
+        <div class="mt-4 h-8 w-3/4 rounded bg-gray-100" />
+        <div class="mt-6 h-3 w-2/3 rounded bg-gray-50" />
       </div>
-    </div>
+    </section>
 
-    <!-- Stats Cards -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Income Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-medium text-gray-600">Thu nhập</h3>
-          <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
+    <section v-else>
+      <div v-if="stats.count === 0"
+        class="rounded-3xl border border-dashed border-gray-200 bg-gradient-to-br from-white via-blue-50 to-white p-10 text-center">
+        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+          </svg>
         </div>
-        <p class="text-2xl font-bold text-green-600">
-          +{{ formatCurrency(stats.income) }}
-        </p>
-      </div>
-
-      <!-- Expense Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-medium text-gray-600">Chi tiêu</h3>
-          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-            </svg>
-          </div>
-        </div>
-        <p class="text-2xl font-bold text-red-600">
-          -{{ formatCurrency(stats.expense) }}
-        </p>
-      </div>
-
-      <!-- Balance Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-medium text-gray-600">Còn lại</h3>
-          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-        <p :class="[
-          'text-2xl font-bold',
-          stats.balance >= 0 ? 'text-blue-600' : 'text-red-600',
-        ]">
-          {{ formatCurrency(Math.abs(stats.balance)) }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Bắt đầu nhanh</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h3 class="text-xl font-semibold text-gray-900">Chưa có dữ liệu trong giai đoạn này</h3>
+        <p class="mt-2 text-gray-500">Thêm giao dịch đầu tiên để dashboard bắt đầu hiển thị thống kê realtime.</p>
         <NuxtLink to="/transactions"
-          class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
-          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-medium text-gray-900">Thêm giao dịch</h3>
-            <p class="text-sm text-gray-500">Ghi lại thu chi của bạn</p>
-          </div>
-        </NuxtLink>
-
-        <NuxtLink to="/transactions"
-          class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-medium text-gray-900">Xem giao dịch</h3>
-            <p class="text-sm text-gray-500">Tổng {{ stats.count }} giao dịch</p>
-          </div>
+          class="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700">
+          Ghi nhận giao dịch
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              d="M7 4a1 1 0 011-1h8a1 1 0 011 1v8a1 1 0 11-2 0V6.414l-9.293 9.293a1 1 0 11-1.414-1.414L13.586 5H8a1 1 0 01-1-1z" />
+          </svg>
         </NuxtLink>
       </div>
-    </div>
+
+      <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <StatCard v-for="card in statCards" :key="card.key" :label="card.label" :amount="card.amount"
+          :variant="card.variant" :chip-label="card.chipLabel" :description="card.description">
+          <template v-if="card.key === 'income'" #meta>
+            <span class="text-xs text-gray-400">{{ incomeShare }}% tổng thu + chi</span>
+          </template>
+          <template v-else-if="card.key === 'expense'" #meta>
+            <span class="text-xs text-gray-400">{{ expenseShare }}% tổng thu + chi</span>
+          </template>
+        </StatCard>
+      </div>
+    </section>
+
+    <section v-if="!isLoading && stats.count > 0" class="grid grid-cols-1 gap-6 lg:grid-cols-[2fr,1fr]">
+      <DashboardChart :labels="lineChartData.labels" :income="lineChartData.income" :expense="lineChartData.expense"
+        :loading="isLoading" :period-label="rangeLabel" />
+      <CategoryChart :slices="categoryChartSlices" :loading="isLoading" />
+    </section>
+
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+          <span>
+            {{ stats.count }} giao dịch trong
+            <span class="font-semibold text-gray-900">{{ rangeLabel }}</span>
+          </span>
+          <span
+            class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+            <span class="h-2 w-2 rounded-full bg-blue-500" /> Thu {{ incomeShare }}%
+            <span class="h-2 w-2 rounded-full bg-rose-500" /> Chi {{ expenseShare }}%
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <NuxtLink to="/transactions"
+            class="group flex items-center rounded-2xl border border-gray-200 p-4 transition hover:border-blue-400 hover:bg-blue-50">
+            <span class="mr-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+              </svg>
+            </span>
+            <div>
+              <h3 class="font-semibold text-gray-900">Thêm giao dịch mới</h3>
+              <p class="text-sm text-gray-500">Cập nhật thu chi để dashboard luôn chính xác</p>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink to="/transactions"
+            class="group flex items-center rounded-2xl border border-gray-200 p-4 transition hover:border-emerald-400 hover:bg-emerald-50">
+            <span
+              class="mr-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+              </svg>
+            </span>
+            <div>
+              <h3 class="font-semibold text-gray-900">Xem danh sách chi tiết</h3>
+              <p class="text-sm text-gray-500">Quản lý {{ stats.count }} giao dịch trong kỳ đã chọn</p>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
   </div>
 </template>

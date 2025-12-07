@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   edit: [transaction: Transaction]
-  delete: [id: string]
+  delete: [transaction: Transaction]
   retry: []
 }>()
 
@@ -23,7 +23,7 @@ const groupedTransactions = computed(() => {
   const groups = new Map<string, Transaction[]>()
 
   props.transactions.forEach((transaction) => {
-    const dateKey = new Date(transaction.date).toISOString().split('T')[0]
+    const dateKey = new Date(transaction.date).toISOString().split('T')[0] ?? ''
     if (!groups.has(dateKey)) {
       groups.set(dateKey, [])
     }

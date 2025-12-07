@@ -9,7 +9,7 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   edit: [transaction: Transaction]
-  delete: [id: string]
+  delete: [transaction: Transaction]
 }>()
 
 const { formatCurrency, formatDate } = useFormatters()
@@ -86,7 +86,7 @@ const amountPrefix = computed(() => {
           </button>
 
           <button class="p-1.5 text-gray-400 hover:text-red-600 rounded transition-colors" title="Xóa"
-            @click="emit('delete', transaction.id)">
+            @click="emit('delete', transaction)">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -1,5 +1,5 @@
 export const useAuth = () => {
-  const supabase = useSupabaseClient()
+  const supabase = useSupabaseClient<any>()
   const user = useSupabaseUser()
 
   // Login with email and password
@@ -10,10 +10,6 @@ export const useAuth = () => {
     })
 
     if (error) throw error
-
-    if (data.user) {
-      user.value = data.user
-    }
 
     return data
   }

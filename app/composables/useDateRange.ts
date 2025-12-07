@@ -1,9 +1,9 @@
-import { 
-  startOfDay, 
-  endOfDay, 
-  startOfWeek, 
-  endOfWeek, 
-  startOfMonth, 
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
   endOfMonth,
   subDays,
   subWeeks,
@@ -11,7 +11,13 @@ import {
   addDays,
   addWeeks,
   addMonths,
-} from 'date-fns';
+  format,
+  isSameDay,
+  isSameWeek,
+  isSameMonth,
+} from 'date-fns'
+
+const DASHBOARD_STORAGE_KEY = 'expense-tracker:dashboard-period'
 
 export type PeriodType = 'daily' | 'weekly' | 'monthly';
 
@@ -21,8 +27,12 @@ export interface DateRange {
 }
 
 export const useDateRange = () => {
-  const currentPeriod = ref<PeriodType>('monthly');
-  const currentDate = ref<Date>(new Date());
+  const savedPeriod = process.client
+    ? (window.localStorage.getItem(DASHBOARD_STORAGE_KEY) as PeriodType | null)
+    : null
+
+  const currentPeriod = ref<PeriodType>(savedPeriod || 'monthly')
+  const currentDate = ref<Date>(new Date())
 
   const dateRange = computed<DateRange>(() => {
     const date = currentDate.value;
@@ -52,8 +62,29 @@ export const useDateRange = () => {
   });
 
   const setPeriod = (period: PeriodType) => {
-    currentPeriod.value = period;
-  };
+    currentPeriod.value = period
+    if (process.client) {
+      window.localStorage.setItem(DASHBOARD_STORAGE_KEY, period)
+    }
+  }
+
+  const isCurrentPeriod = (period: PeriodType, referenceDate: Date) => {
+    const today = new Date()
+    switch (period) {
+      case 'daily':
+        return isSameDay(referenceDate, today)
+      case 'weekly':
+        return isSameWeek(referenceDate, today, { weekStartsOn: 1 })
+      case 'monthly':
+        return isSameMonth(referenceDate, today)
+      default:
+        return false
+    }
+  }
+
+  const viewingCurrentPeriod = computed(() =>
+    isCurrentPeriod(currentPeriod.value, currentDate.value)
+  )
 
   const goToPrevious = () => {
     switch (currentPeriod.value) {
@@ -69,32 +100,45 @@ export const useDateRange = () => {
     }
   };
 
-  const goToNext = () => {
+  const getNextDate = () => {
     switch (currentPeriod.value) {
       case 'daily':
-        currentDate.value = addDays(currentDate.value, 1);
-        break;
+        return addDays(currentDate.value, 1)
       case 'weekly':
-        currentDate.value = addWeeks(currentDate.value, 1);
-        break;
+        return addWeeks(currentDate.value, 1)
       case 'monthly':
-        currentDate.value = addMonths(currentDate.value, 1);
-        break;
+        return addMonths(currentDate.value, 1)
+      default:
+        return currentDate.value
     }
-  };
+  }
+
+  const canGoToNext = computed(() => {
+    const today = new Date()
+    return getNextDate().getTime() <= endOfDay(today).getTime()
+  })
+
+  const goToNext = () => {
+    if (!canGoToNext.value) return
+    currentDate.value = getNextDate()
+  }
 
   const goToToday = () => {
-    currentDate.value = new Date();
-  };
+    currentDate.value = new Date()
+  }
 
-  const isToday = computed(() => {
-    const today = new Date();
-    return (
-      currentDate.value.getDate() === today.getDate() &&
-      currentDate.value.getMonth() === today.getMonth() &&
-      currentDate.value.getFullYear() === today.getFullYear()
-    );
-  });
+  const periodLabel = computed(() => {
+    switch (currentPeriod.value) {
+      case 'daily':
+        return format(currentDate.value, 'dd MMM yyyy')
+      case 'weekly':
+        return `Tuần ${format(currentDate.value, "II 'năm' yyyy")}`
+      case 'monthly':
+        return format(currentDate.value, "MMM yyyy")
+      default:
+        return format(currentDate.value, "MMM yyyy")
+    }
+  })
 
   return {
     currentPeriod,
@@ -104,6 +148,9 @@ export const useDateRange = () => {
     goToPrevious,
     goToNext,
     goToToday,
-    isToday,
+    viewingCurrentPeriod,
+    canGoToNext,
+    periodLabel,
+    isCurrentPeriod,
   };
 };

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { Category } from '~/types/category'
 
 export const useCategoriesStore = defineStore('categories', () => {
-  const supabase = useSupabaseClient()
+  const supabase = useSupabaseClient<any>()
   const user = useSupabaseUser()
 
   // State

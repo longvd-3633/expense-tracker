@@ -19,7 +19,6 @@ export const useCSVExport = () => {
     // Convert to CSV
     const csv = Papa.unparse(csvData, {
       header: true,
-      encoding: 'UTF-8',
     });
 
     // Add UTF-8 BOM for proper Excel display

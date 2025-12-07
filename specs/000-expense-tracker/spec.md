@@ -370,6 +370,12 @@ interface UserSettings {
 - ✅ Success messages: Green toast, auto-dismiss 2-3s
 - ✅ Loading states: Skeleton screens, spinners, disable buttons during operation
 
+**Rate Limiting (Transactions API):**
+- ✅ Create/Update/Delete operations: Max 60 requests/user/minute (HTTP 429 with retry-after header)
+- ✅ Bulk import/export endpoints: Max 10 jobs/user/hour (queued nếu vượt quá)
+- ✅ Realtime subscription reconnects: Max 5 attempts/minute before exponential backoff
+- ✅ Monitoring: Emit rate-limit events to logging pipeline for auditing
+
 **Testing Requirements:**
 - ✅ Positive test cases:
   - Create transaction với valid data (all field combinations)

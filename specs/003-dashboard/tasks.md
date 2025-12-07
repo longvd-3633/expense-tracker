@@ -215,17 +215,17 @@ Each task follows this format:
 - [X] T086 [P] [US2] Create app/composables/useDateRange.ts with period calculations (Daily, Weekly, Monthly)
 - [X] T087 [P] [US2] Implement getPeriodRange(type, offset) function in useDateRange.ts (returns { start, end } dates)
 - [X] T088 [P] [US2] Implement formatPeriodLabel(type, date) function in useDateRange.ts (e.g., "12 Dec 2025", "Week 50, 2025", "Dec 2025")
-- [ ] T089 [P] [US2] Add isCurrentPeriod(type, date) check function in useDateRange.ts
+- [X] T089 [P] [US2] Add isCurrentPeriod(type, date) check function in useDateRange.ts
 - [X] T090 [P] [US2] Add period navigation functions in useDateRange.ts (goToNext, goToPrevious, goToCurrent)
 
 ### UI Components
 
-- [ ] T091 [P] [US2] Create app/components/molecules/StatCard.vue for summary display (icon, label, amount, color coding) - Design with `/ui-ux-pro-max` command
-- [ ] T092 [P] [US2] Create app/components/molecules/PeriodSelector.vue with tab buttons (Daily, Weekly, Monthly) - Design with `/ui-ux-pro-max` command
-- [ ] T093 [P] [US2] Create app/components/molecules/DateNavigator.vue with prev/next arrows and current period label - Design with `/ui-ux-pro-max` command
-- [ ] T094 [US2] Add active period highlighting in PeriodSelector.vue
-- [ ] T095 [US2] Add keyboard shortcuts in DateNavigator.vue (Left arrow: previous, Right arrow: next, T: today)
-- [ ] T096 [US2] Disable "next" button in DateNavigator.vue when viewing future period
+- [X] T091 [P] [US2] Create app/components/molecules/StatCard.vue for summary display (icon, label, amount, color coding) - Design with `/ui-ux-pro-max` command
+- [X] T092 [P] [US2] Create app/components/molecules/PeriodSelector.vue with tab buttons (Daily, Weekly, Monthly) - Design with `/ui-ux-pro-max` command
+- [X] T093 [P] [US2] Create app/components/molecules/DateNavigator.vue with prev/next arrows and current period label - Design with `/ui-ux-pro-max` command
+- [X] T094 [US2] Add active period highlighting in PeriodSelector.vue
+- [X] T095 [US2] Add keyboard shortcuts in DateNavigator.vue (Left arrow: previous, Right arrow: next, T: today)
+- [X] T096 [US2] Disable "next" button in DateNavigator.vue when viewing future period
 
 ### Store Enhancements
 
@@ -236,10 +236,10 @@ Each task follows this format:
 ### Page Implementation
 
 - [X] T100 [US2] Create app/pages/index.vue (Dashboard page) with 3-column grid layout for summary cards - Design with `/ui-ux-pro-max` command
-- [ ] T101 [US2] Add PeriodSelector component to app/pages/index.vue with localStorage persistence
-- [ ] T102 [US2] Add DateNavigator component to app/pages/index.vue
+- [X] T101 [US2] Add PeriodSelector component to app/pages/index.vue with localStorage persistence
+- [X] T102 [US2] Add DateNavigator component to app/pages/index.vue
 - [X] T103 [US2] Implement summary calculation in app/pages/index.vue using store getters and date range
-- [ ] T104 [US2] Add StatCard components to app/pages/index.vue (Income: green, Expense: red, Balance: green/red/gray)
+- [X] T104 [US2] Add StatCard components to app/pages/index.vue (Income: green, Expense: red, Balance: green/red/gray)
 - [X] T105 [US2] Add number formatting in app/pages/index.vue using formatCurrency composable
 - [X] T106 [US2] Implement color coding for balance (positive: green, negative: red, zero: gray)
 - [X] T107 [US2] Add empty state UI in app/pages/index.vue ("Chưa có giao dịch nào trong [period]" with CTA button) - Design with `/ui-ux-pro-max` command
@@ -248,19 +248,19 @@ Each task follows this format:
 
 ### Real-time Updates
 
-- [ ] T110 [US2] Connect dashboard to Supabase subscription (reuse from transactions store)
-- [ ] T111 [US2] Add real-time summary updates in app/pages/index.vue (recalculate on transaction changes)
-- [ ] T112 [US2] Add count-up animation for amount changes (optional, smooth transition)
+- [X] T110 [US2] Connect dashboard to Supabase subscription (reuse from transactions store)
+- [X] T111 [US2] Add real-time summary updates in app/pages/index.vue (recalculate on transaction changes)
+- [X] T112 [US2] Add count-up animation for amount changes (optional, smooth transition)
 
 ### Testing
 
-- [ ] T113 [US2] Test summary calculation correctness (create income/expense, verify totals)
-- [ ] T114 [US2] Test period switching (Daily → Weekly → Monthly, verify date ranges)
-- [ ] T115 [US2] Test date navigation (prev/next, today button, keyboard shortcuts)
-- [ ] T116 [US2] Test real-time updates (add transaction, verify dashboard updates automatically)
-- [ ] T117 [US2] Test empty state (switch to period with no transactions)
-- [ ] T118 [US2] Test number formatting (large amounts, negative balance, different formats)
-- [ ] T119 [US2] Test responsive layout (mobile, tablet, desktop breakpoints)
+- [X] T113 [US2] Test summary calculation correctness (create income/expense, verify totals)
+- [X] T114 [US2] Test period switching (Daily → Weekly → Monthly, verify date ranges)
+- [X] T115 [US2] Test date navigation (prev/next, today button, keyboard shortcuts)
+- [X] T116 [US2] Test real-time updates (add transaction, verify dashboard updates automatically)
+- [X] T117 [US2] Test empty state (switch to period with no transactions)
+- [X] T118 [US2] Test number formatting (large amounts, negative balance, different formats)
+- [X] T119 [US2] Test responsive layout (mobile, tablet, desktop breakpoints)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -282,38 +282,38 @@ Each task follows this format:
 
 ### Data Aggregation
 
-- [ ] T120 [P] [US3] Add getter in app/stores/transactions.ts: getIncomeByDate(start, end, granularity) for chart data
-- [ ] T121 [P] [US3] Add getter in app/stores/transactions.ts: getExpenseByDate(start, end, granularity) for chart data
-- [ ] T122 [P] [US3] Add getter in app/stores/transactions.ts: getExpenseByCategory(start, end) for pie chart
-- [ ] T123 [P] [US3] Implement date bucketing logic in getters (hourly for daily, daily for weekly/monthly)
-- [ ] T124 [P] [US3] Implement category grouping logic (max 15 slices, group smaller ones into "Others")
+- [X] T120 [P] [US3] Add getter in app/stores/transactions.ts: getIncomeByDate(start, end, granularity) for chart data
+- [X] T121 [P] [US3] Add getter in app/stores/transactions.ts: getExpenseByDate(start, end, granularity) for chart data
+- [X] T122 [P] [US3] Add getter in app/stores/transactions.ts: getExpenseByCategory(start, end) for pie chart
+- [X] T123 [P] [US3] Implement date bucketing logic in getters (hourly for daily, daily for weekly/monthly)
+- [X] T124 [P] [US3] Implement category grouping logic (max 15 slices, group smaller ones into "Others")
 
 ### Chart Components
 
-- [ ] T125 [P] [US3] Create app/components/organisms/DashboardChart.vue for line/bar chart (Chart.js wrapper) - Design with `/ui-ux-pro-max` command
-- [ ] T126 [P] [US3] Create app/components/organisms/CategoryChart.vue for pie/doughnut chart (Chart.js wrapper) - Design with `/ui-ux-pro-max` command
-- [ ] T127 [US3] Configure line chart in DashboardChart.vue (2 datasets: Income green, Expense red)
-- [ ] T128 [US3] Add chart options in DashboardChart.vue (gridlines, zero line, Y-axis currency format, X-axis time labels)
-- [ ] T129 [US3] Configure doughnut chart in CategoryChart.vue (use category colors, center text with total expense)
-- [ ] T130 [US3] Add chart options in CategoryChart.vue (legend, labels with percentages, minimum slice size 1%)
-- [ ] T131 [US3] Implement responsive sizing in both chart components (aspect ratios: 16:9 desktop, 4:3 mobile)
-- [ ] T132 [US3] Add tooltips in charts (line: "[Date]: Thu [amount] ₫, Chi [amount] ₫", pie: "[Category]: [amount] ₫ ([%])")
-- [ ] T133 [US3] Add legend in charts (Income/Expense for line, interactive click to hide/show series)
-- [ ] T134 [US3] Add empty state in chart components ("Không có dữ liệu trong khoảng thời gian này") - Design with `/ui-ux-pro-max` command
+- [X] T125 [P] [US3] Create app/components/organisms/DashboardChart.vue for line/bar chart (Chart.js wrapper) - Design with `/ui-ux-pro-max` command
+- [X] T126 [P] [US3] Create app/components/organisms/CategoryChart.vue for pie/doughnut chart (Chart.js wrapper) - Design with `/ui-ux-pro-max` command
+- [X] T127 [US3] Configure line chart in DashboardChart.vue (2 datasets: Income green, Expense red)
+- [X] T128 [US3] Add chart options in DashboardChart.vue (gridlines, zero line, Y-axis currency format, X-axis time labels)
+- [X] T129 [US3] Configure doughnut chart in CategoryChart.vue (use category colors, center text with total expense)
+- [X] T130 [US3] Add chart options in CategoryChart.vue (legend, labels with percentages, minimum slice size 1%)
+- [X] T131 [US3] Implement responsive sizing in both chart components (aspect ratios: 16:9 desktop, 4:3 mobile)
+- [X] T132 [US3] Add tooltips in charts (line: "[Date]: Thu [amount] ₫, Chi [amount] ₫", pie: "[Category]: [amount] ₫ ([%])")
+- [X] T133 [US3] Add legend in charts (Income/Expense for line, interactive click to hide/show series)
+- [X] T134 [US3] Add empty state in chart components ("Không có dữ liệu trong khoảng thời gian này") - Design with `/ui-ux-pro-max` command
 
 ### Dashboard Integration
 
-- [ ] T135 [US3] Add DashboardChart component to app/pages/index.vue below summary cards
-- [ ] T136 [US3] Add CategoryChart component to app/pages/index.vue (side-by-side with line chart on desktop)
-- [ ] T137 [US3] Connect charts to period selection (update chart data when period changes)
-- [ ] T138 [US3] Implement responsive layout for charts (single column mobile, 2 columns desktop) - Design with `/ui-ux-pro-max` command
+- [X] T135 [US3] Add DashboardChart component to app/pages/index.vue below summary cards
+- [X] T136 [US3] Add CategoryChart component to app/pages/index.vue (side-by-side with line chart on desktop)
+- [X] T137 [US3] Connect charts to period selection (update chart data when period changes)
+- [X] T138 [US3] Implement responsive layout for charts (single column mobile, 2 columns desktop) - Design with `/ui-ux-pro-max` command
 - [ ] T139 [US3] Add chart interactivity: click pie slice to filter transactions by category (optional enhancement)
 
 ### Real-time Updates
 
-- [ ] T140 [US3] Connect charts to Supabase subscription (update on transaction changes)
-- [ ] T141 [US3] Add smooth transition animation in charts (300ms) when data changes
-- [ ] T142 [US3] Implement throttling (max 1 update/second) for rapid changes
+- [X] T140 [US3] Connect charts to Supabase subscription (update on transaction changes)
+- [X] T141 [US3] Add smooth transition animation in charts (300ms) when data changes
+- [X] T142 [US3] Implement throttling (max 1 update/second) for rapid changes
 
 ### Testing
 
