@@ -20,6 +20,9 @@ coverage/
 .fleet
 .idea
 .vscode
+Thumbs.db
+*.tmp
+*.swp
 
 # Local env files
 .env

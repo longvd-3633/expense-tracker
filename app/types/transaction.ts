@@ -4,7 +4,7 @@ export interface Transaction {
   date: Date;                    // Transaction date
   type: 'income' | 'expense';    // Transaction type
   amount: number;                // Amount in VND
-  category: string;              // Category ID
+  category: string | null;       // Category ID (can be null for legacy data)
   description: string;           // Description/notes
   tags?: string[];               // Optional tags
   createdAt: Date;               // Created timestamp

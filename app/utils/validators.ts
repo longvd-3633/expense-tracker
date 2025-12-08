@@ -10,7 +10,9 @@ export const TransactionSchema = z.object({
     .number({ invalid_type_error: 'Số tiền phải là số' })
     .min(MIN_AMOUNT, 'Số tiền phải lớn hơn 0')
     .max(MAX_AMOUNT, `Số tiền không được vượt quá ${MAX_AMOUNT.toLocaleString('vi-VN')}`),
-  category: z.string().min(1, 'Vui lòng chọn danh mục'),
+  category: z.string({ required_error: 'Vui lòng chọn danh mục' })
+    .min(1, 'Vui lòng chọn danh mục')
+    .uuid('Danh mục không hợp lệ'),
   description: z.string().max(500, 'Mô tả tối đa 500 ký tự').optional(),
   tags: z
     .array(z.string().min(1, 'Tag không được để trống').max(50, 'Tag tối đa 50 ký tự'))

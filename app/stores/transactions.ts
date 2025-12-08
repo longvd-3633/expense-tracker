@@ -47,7 +47,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     date: new Date(record.date),
     type: record.type,
     amount: record.amount,
-    category: record.category_id,
+    category: record.category_id || null,
     description: record.description ?? '',
     tags: record.tags ?? [],
     createdAt: new Date(record.created_at),
@@ -202,16 +202,23 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   // Actions
   const fetchTransactions = async () => {
-    if (!user.value) return
-
     loading.value = true
     error.value = null
 
     try {
+      // Get current session to ensure we have the user
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user?.id) {
+        console.warn('Cannot fetch transactions: user not authenticated')
+        loading.value = false
+        return
+      }
+
       const { data, error: fetchError } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
         .order('date', { ascending: false })
 
       if (fetchError) throw fetchError
@@ -227,7 +234,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   }
 
   const ensureSubscription = () => {
-    if (subscription.value || !user.value) return
+    if (subscription.value || !user.value?.id) return
 
     const channel = supabase
       .channel('transactions-changes')
@@ -289,7 +296,17 @@ export const useTransactionsStore = defineStore('transactions', () => {
   )
 
   const addTransaction = async (input: TransactionInput) => {
-    if (!user.value) return
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      throw new Error('Người dùng chưa đăng nhập')
+    }
+
+    // Validate category is not empty
+    if (!input.category || input.category.trim() === '') {
+      throw new Error('Vui lòng chọn danh mục')
+    }
 
     loading.value = true
     error.value = null
@@ -298,7 +315,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       const { data, error: insertError } = await supabase
         .from('transactions')
         .insert({
-          user_id: user.value.id,
+          user_id: session.user.id,
           date: input.date.toISOString(),
           type: input.type,
           amount: input.amount,
@@ -325,7 +342,17 @@ export const useTransactionsStore = defineStore('transactions', () => {
   }
 
   const updateTransaction = async (id: string, updates: Partial<TransactionInput>) => {
-    if (!user.value) return
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      throw new Error('Người dùng chưa đăng nhập')
+    }
+
+    // Validate category if provided
+    if (updates.category !== undefined && (!updates.category || updates.category.trim() === '')) {
+      throw new Error('Vui lòng chọn danh mục')
+    }
 
     loading.value = true
     error.value = null
@@ -335,15 +362,15 @@ export const useTransactionsStore = defineStore('transactions', () => {
       if (updates.date) updateData.date = updates.date.toISOString()
       if (updates.type) updateData.type = updates.type
       if (updates.amount !== undefined) updateData.amount = updates.amount
-      if (updates.category) updateData.category_id = updates.category
+      if (updates.category !== undefined) updateData.category_id = updates.category
       if (updates.description !== undefined) updateData.description = updates.description
       if (updates.tags !== undefined) updateData.tags = updates.tags
 
       const { data, error: updateError } = await supabase
         .from('transactions')
-        .update(updateData)
+        .update(payload)
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
         .select()
         .single()
 
@@ -365,7 +392,12 @@ export const useTransactionsStore = defineStore('transactions', () => {
   }
 
   const deleteTransaction = async (id: string) => {
-    if (!user.value) return
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      throw new Error('Người dùng chưa đăng nhập')
+    }
 
     loading.value = true
     error.value = null
@@ -375,7 +407,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
         .from('transactions')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
 
       if (deleteError) throw deleteError
 
@@ -390,7 +422,17 @@ export const useTransactionsStore = defineStore('transactions', () => {
   }
 
   const restoreTransaction = async (transaction: Transaction) => {
-    if (!user.value) return
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      throw new Error('Người dùng chưa đăng nhập')
+    }
+
+    // Validate category
+    if (!transaction.category || transaction.category.trim() === '') {
+      throw new Error('Giao dịch không hợp lệ: thiếu danh mục')
+    }
 
     loading.value = true
     error.value = null
@@ -398,7 +440,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     try {
       const payload = {
         id: transaction.id,
-        user_id: user.value.id,
+        user_id: session.user.id,
         date: transaction.date.toISOString(),
         type: transaction.type,
         amount: transaction.amount,

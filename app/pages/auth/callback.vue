@@ -47,33 +47,77 @@ const error = ref('')
 
 onMounted(async () => {
   try {
-    // Get the URL hash parameters
+    console.log('Callback URL:', window.location.href)
+    
+    // Check URL query params
+    const urlParams = new URLSearchParams(window.location.search)
+    const tokenHash = urlParams.get('token_hash')
+    const type = urlParams.get('type')
+    
+    console.log('Token Hash:', tokenHash ? 'present' : 'missing')
+    console.log('Type:', type)
+
+    // If we have token_hash, we need to verify it with Supabase
+    if (tokenHash) {
+      console.log('Verifying token_hash with Supabase...')
+      
+      // Verify the OTP token
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: type === 'recovery' ? 'recovery' : 'email',
+      })
+      
+      if (verifyError) {
+        console.error('Verification error:', verifyError)
+        throw new Error('Không thể xác thực token. Link có thể đã hết hạn hoặc đã được sử dụng.')
+      }
+      
+      if (data.session) {
+        console.log('Session created:', data.session.user.email)
+        
+        // Redirect based on type
+        if (type === 'recovery') {
+          console.log('Redirecting to reset-password')
+          await router.push('/reset-password')
+        } else {
+          await router.push('/')
+        }
+        return
+      }
+      
+      throw new Error('Không thể tạo session từ token')
+    }
+    
+    // Fallback: Check for access_token in hash (old flow or OAuth)
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
     const accessToken = hashParams.get('access_token')
     const refreshToken = hashParams.get('refresh_token')
-    const type = hashParams.get('type')
+    const hashType = hashParams.get('type')
+    
+    if (accessToken) {
+      console.log('Found access_token, setting session...')
+      
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken || '',
+      })
 
-    if (!accessToken) {
-      throw new Error('Không tìm thấy token xác thực')
+      if (sessionError) throw sessionError
+      
+      const finalType = type || hashType
+      if (finalType === 'recovery') {
+        await router.push('/reset-password')
+      } else {
+        await router.push('/')
+      }
+      return
     }
-
-    // Set the session with the tokens from URL
-    const { error: sessionError } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken || '',
-    })
-
-    if (sessionError) throw sessionError
-
-    // Handle different callback types
-    if (type === 'recovery') {
-      // Password recovery - redirect to reset password page
-      await router.push('/reset-password')
-    } else {
-      // Email confirmation or other types - redirect to dashboard
-      await router.push('/')
-    }
+    
+    // No valid auth method found
+    throw new Error('Không tìm thấy thông tin xác thực trong URL')
+    
   } catch (e: any) {
+    console.error('Callback error:', e)
     error.value = e.message || 'Có lỗi xảy ra trong quá trình xác thực'
     loading.value = false
   }

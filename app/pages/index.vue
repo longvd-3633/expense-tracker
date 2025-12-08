@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 const transactionsStore = useTransactionsStore()
 const categoriesStore = useCategoriesStore()
+const user = useSupabaseUser()
+const { transactions } = storeToRefs(transactionsStore)
+const { categories } = storeToRefs(categoriesStore)
 const {
   currentPeriod,
   dateRange,
@@ -26,8 +30,11 @@ const rangeFormatter = new Intl.DateTimeFormat('vi-VN', {
 
 const rangeLabel = computed(() => `${rangeFormatter.format(dateRange.value.start)} – ${rangeFormatter.format(dateRange.value.end)}`)
 
+// Load data when component mounts (auth is already checked by middleware)
 onMounted(async () => {
   try {
+    // Wait a tick to ensure Supabase client is ready
+    await nextTick()
     await Promise.all([
       categoriesStore.fetchCategories(),
       transactionsStore.fetchTransactions(),
@@ -220,6 +227,17 @@ const handleReconnect = async () => {
     reconnecting.value = false
   }
 }
+
+const handleCategoryClick = (categoryId: string | null | undefined, isOthers: boolean) => {
+  if (isOthers) {
+    // For "Others" group, navigate to transactions without category filter
+    // User can manually filter there
+    navigateTo('/transactions')
+  } else if (categoryId) {
+    // Navigate to transactions page with category filter
+    navigateTo(`/transactions?category=${categoryId}`)
+  }
+}
 </script>
 
 <template>
@@ -294,14 +312,15 @@ const handleReconnect = async () => {
           class="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700">
           Ghi nhận giao dịch
           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              d="M7 4a1 1 0 011-1h8a1 1 0 011 1v8a1 1 0 11-2 0V6.414l-9.293 9.293a1 1 0 11-1.414-1.414L13.586 5H8a1 1 0 01-1-1z" />
+            <path fill-rule="evenodd"
+              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+              clip-rule="evenodd" />
           </svg>
         </NuxtLink>
       </div>
 
       <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <StatCard v-for="card in statCards" :key="card.key" :label="card.label" :amount="card.amount"
+        <MoleculesStatCard v-for="card in statCards" :key="card.key" :label="card.label" :amount="card.amount"
           :variant="card.variant" :chip-label="card.chipLabel" :description="card.description">
           <template v-if="card.key === 'income'" #meta>
             <span class="text-xs text-gray-400">{{ incomeShare }}% tổng thu + chi</span>
@@ -309,14 +328,14 @@ const handleReconnect = async () => {
           <template v-else-if="card.key === 'expense'" #meta>
             <span class="text-xs text-gray-400">{{ expenseShare }}% tổng thu + chi</span>
           </template>
-        </StatCard>
+        </MoleculesStatCard>
       </div>
     </section>
 
     <section v-if="!isLoading && stats.count > 0" class="grid grid-cols-1 gap-6 lg:grid-cols-[2fr,1fr]">
       <DashboardChart :labels="lineChartData.labels" :income="lineChartData.income" :expense="lineChartData.expense"
         :loading="isLoading" :period-label="rangeLabel" />
-      <CategoryChart :slices="categoryChartSlices" :loading="isLoading" />
+      <CategoryChart :slices="categoryChartSlices" :loading="isLoading" @slice-click="handleCategoryClick" />
     </section>
 
     <section class="rounded-2xl bg-white p-6 shadow-sm">

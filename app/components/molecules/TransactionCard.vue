@@ -16,6 +16,7 @@ const { formatCurrency, formatDate } = useFormatters()
 const categoriesStore = useCategoriesStore()
 
 const category = computed(() => {
+  if (!props.transaction.category) return null
   return categoriesStore.getCategoryById(props.transaction.category)
 })
 
@@ -29,8 +30,8 @@ const amountPrefix = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
-    <div class="flex items-start justify-between">
+  <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm transition hover:shadow-lg">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <!-- Left: Category icon and info -->
       <div class="flex items-start space-x-3 flex-1">
         <div v-if="category" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
@@ -59,7 +60,7 @@ const amountPrefix = computed(() => {
             {{ transaction.description }}
           </p>
 
-          <div class="mt-1 flex items-center space-x-2 text-xs text-gray-500">
+          <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <span>{{ formatDate(transaction.date) }}</span>
             <span v-if="transaction.tags && transaction.tags.length > 0" class="flex items-center space-x-1">
               <span>•</span>
@@ -70,7 +71,7 @@ const amountPrefix = computed(() => {
       </div>
 
       <!-- Right: Amount and actions -->
-      <div class="flex flex-col items-end space-y-2 ml-4">
+      <div class="flex flex-col items-end space-y-2 md:ml-4">
         <span :class="['text-lg font-bold', amountColor]">
           {{ amountPrefix }}{{ formatCurrency(transaction.amount) }}
         </span>

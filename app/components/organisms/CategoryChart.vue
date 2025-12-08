@@ -19,6 +19,10 @@ const props = withDefaults(defineProps<{ slices: CategorySlice[]; loading?: bool
   title: 'Cơ cấu chi tiêu theo danh mục',
 })
 
+const emit = defineEmits<{
+  sliceClick: [categoryId: string | null | undefined, isOthers: boolean]
+}>()
+
 const { formatCurrency } = useFormatters()
 
 const totalValue = computed(() => props.slices.reduce((sum, slice) => sum + slice.value, 0))
@@ -40,6 +44,16 @@ const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   cutout: '60%',
+  animation: { duration: 300 },
+  onClick: (_event: any, elements: any[]) => {
+    if (elements.length > 0) {
+      const index = elements[0].index
+      const slice = props.slices[index]
+      if (slice) {
+        emit('sliceClick', slice.categoryId, slice.isOthers || false)
+      }
+    }
+  },
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -80,9 +94,9 @@ const legendItems = computed(() =>
 
       <div v-else class="flex flex-col gap-6 lg:flex-row lg:items-center">
         <ClientOnly>
-          <div class="relative mx-auto h-64 w-64">
+          <div class="relative mx-auto h-64 w-64 cursor-pointer">
             <Doughnut :data="chartData" :options="chartOptions" />
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
               <span class="text-sm uppercase tracking-widest text-gray-400">Tổng chi</span>
               <span class="text-lg font-semibold text-gray-900">{{ formatCurrency(totalValue) }}</span>
             </div>

@@ -19,27 +19,36 @@ export const useCategoriesStore = defineStore('categories', () => {
     categories.value.filter(c => c.type === 'expense')
   )
 
-  const getCategoryById = (id: string) => {
+  const getCategoryById = (id?: string | null) => {
+    if (!id) return undefined
     return categories.value.find(c => c.id === id)
   }
 
   // Actions
   const fetchCategories = async () => {
-    if (!user.value) return
-
     loading.value = true
     error.value = null
 
     try {
+      // Get current session to ensure we have the user
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user?.id) {
+        console.warn('Cannot fetch categories: user not authenticated')
+        loading.value = false
+        return
+      }
+
       const { data, error: fetchError } = await supabase
         .from('categories')
         .select('*')
-        .or(`user_id.eq.${user.value.id},is_default.eq.true`)
+        .eq('is_default', true)  // Only fetch default categories for now (US6 not implemented yet)
         .order('name')
 
       if (fetchError) throw fetchError
 
-      categories.value = (data || []).map(c => ({
+      // Map categories and remove duplicates by ID (in case of duplicate inserts)
+      const mapped = (data || []).map(c => ({
         id: c.id,
         userId: c.user_id,
         name: c.name,
@@ -48,6 +57,17 @@ export const useCategoriesStore = defineStore('categories', () => {
         icon: c.icon,
         isDefault: c.is_default,
       }))
+
+      // Remove duplicates by name and type (in case migration ran multiple times)
+      const seenKey = new Map<string, typeof mapped[0]>()
+      mapped.forEach(c => {
+        const key = `${c.name.toLowerCase()}-${c.type}`
+        if (!seenKey.has(key)) {
+          seenKey.set(key, c)
+        }
+      })
+      
+      categories.value = Array.from(seenKey.values())
     } catch (e: any) {
       error.value = e.message
       console.error('Error fetching categories:', e)

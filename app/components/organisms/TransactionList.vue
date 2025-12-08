@@ -111,17 +111,17 @@ const calculateGroupTotal = (transactions: Transaction[]) => {
 
     <!-- Transaction List -->
     <div v-else class="space-y-6">
-      <div v-for="group in groupedTransactions" :key="group.date" class="space-y-3">
+      <div v-for="group in groupedTransactions" :key="group.date" class="space-y-3 rounded-3xl border border-gray-100 bg-white/80 p-4 shadow-sm">
         <!-- Date Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
           <h3 class="text-sm font-semibold text-gray-700">
             {{ formatGroupDate(group.date) }}
           </h3>
           <span :class="[
-            'text-sm font-medium',
+            'text-sm font-semibold',
             calculateGroupTotal(group.transactions) >= 0
-              ? 'text-green-600'
-              : 'text-red-600',
+              ? 'text-emerald-600'
+              : 'text-rose-600',
           ]">
             {{ calculateGroupTotal(group.transactions) >= 0 ? '+' : '' }}
             {{ calculateGroupTotal(group.transactions).toLocaleString('vi-VN') }}₫
@@ -129,7 +129,7 @@ const calculateGroupTotal = (transactions: Transaction[]) => {
         </div>
 
         <!-- Transaction Cards -->
-        <div class="space-y-2">
+        <div class="space-y-3">
           <MoleculesTransactionCard v-for="transaction in group.transactions" :key="transaction.id"
             :transaction="transaction" @edit="emit('edit', transaction)" @delete="emit('delete', $event)" />
         </div>

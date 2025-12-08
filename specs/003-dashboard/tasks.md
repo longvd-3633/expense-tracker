@@ -172,14 +172,14 @@ Each task follows this format:
 - [X] T070 [US1] Connect TransactionForm to store actions (create/update) in app/pages/transactions/index.vue
 - [X] T071 [US1] Add delete confirmation dialog in TransactionCard.vue ("Xóa giao dịch này?" with amount, category, date) - Design with `/ui-ux-pro-max` command
 - [X] T072 [US1] Implement undo/restore functionality for delete (5 second timeout with toast notification)
-- [ ] T073 [US1] Style all transaction components with TailwindCSS (responsive mobile/desktop breakpoints)
+- [X] T073 [US1] Style all transaction components with TailwindCSS (responsive mobile/desktop breakpoints)
 
 ### Real-time & Sync
 
 - [X] T074 [US1] Setup Supabase real-time subscription in app/stores/transactions.ts (listen to INSERT, UPDATE, DELETE events)
 - [X] T075 [US1] Handle subscription events: auto-insert new transactions, update existing, remove deleted (with smooth animations)
 - [X] T076 [US1] Add subscription disconnect handling (fallback to manual refresh, show warning indicator)
-- [ ] T077 [US1] Implement conflict detection for concurrent edits (show modal with options when transaction updated by another device)
+- [X] T077 [US1] Implement conflict detection for concurrent edits (show modal with options when transaction updated by another device)
 
 ### Testing & Validation
 
@@ -307,7 +307,7 @@ Each task follows this format:
 - [X] T136 [US3] Add CategoryChart component to app/pages/index.vue (side-by-side with line chart on desktop)
 - [X] T137 [US3] Connect charts to period selection (update chart data when period changes)
 - [X] T138 [US3] Implement responsive layout for charts (single column mobile, 2 columns desktop) - Design with `/ui-ux-pro-max` command
-- [ ] T139 [US3] Add chart interactivity: click pie slice to filter transactions by category (optional enhancement)
+- [X] T139 [US3] Add chart interactivity: click pie slice to filter transactions by category (optional enhancement)
 
 ### Real-time Updates
 

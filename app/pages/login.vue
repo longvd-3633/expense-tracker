@@ -94,14 +94,16 @@ const handleLogin = async () => {
   try {
     loading.value = true
 
-    await login(form.value.email, form.value.password)
+    const result = await login(form.value.email, form.value.password)
+    console.log('Login successful:', result.user?.email)
 
-    // Wait a bit for auth state to update
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    // Redirect to intended page or dashboard
+    // Get redirect path before navigation
     const redirect = route.query.redirect as string || '/'
-    await navigateTo(redirect, { replace: true })
+    console.log('Redirecting to:', redirect)
+
+    // Use window.location for full page reload to ensure auth state is fresh
+    // This prevents middleware issues with stale user state
+    window.location.href = redirect
   } catch (e: any) {
     console.error('Login error:', e)
     if (e.message?.includes('Invalid login credentials')) {
@@ -111,7 +113,6 @@ const handleLogin = async () => {
     } else {
       error.value = e.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
     }
-  } finally {
     loading.value = false
   }
 }
