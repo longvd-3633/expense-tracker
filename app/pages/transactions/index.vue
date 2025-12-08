@@ -350,13 +350,13 @@ const handleUndoDelete = async () => {
         <p class="text-gray-600">Quản lý thu chi của bạn</p>
       </div>
 
-      <AtomsButton variant="primary" size="lg" @click="handleAddTransaction">
+      <Button variant="primary" size="lg" @click="handleAddTransaction">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         Thêm giao dịch
-      </AtomsButton>
+      </Button>
     </div>
 
     <div v-if="transactionsStore.realtimeDisconnected"
@@ -372,18 +372,18 @@ const handleUndoDelete = async () => {
           <p class="text-sm">Vui lòng tải lại để đồng bộ dữ liệu mới nhất.</p>
         </div>
       </div>
-      <AtomsButton variant="secondary" size="sm" @click="handleReconnect">
+      <Button variant="secondary" size="sm" @click="handleReconnect">
         Kết nối lại
-      </AtomsButton>
+      </Button>
     </div>
 
     <!-- Transaction List -->
-    <OrganismsTransactionList :transactions="transactionsStore.sortedTransactions" :loading="isLoading"
+    <TransactionList :transactions="transactionsStore.sortedTransactions" :loading="isLoading"
       :error="transactionsStore.error" @edit="handleEditTransaction" @delete="requestDeleteTransaction"
       @retry="handleRetry" />
 
     <!-- Transaction Form Modal -->
-    <OrganismsTransactionForm v-model:is-open="isFormOpen" :initial-data="formInitialData"
+    <TransactionForm v-model:is-open="isFormOpen" :initial-data="formInitialData"
       @submit="handleSubmit" />
 
     <!-- Delete Confirmation Modal -->
@@ -432,13 +432,13 @@ const handleUndoDelete = async () => {
             </p>
 
             <div class="flex items-center justify-end space-x-3">
-              <AtomsButton variant="ghost" @click="resetDeleteState">
+              <Button variant="ghost" @click="resetDeleteState">
                 Hủy
-              </AtomsButton>
-              <AtomsButton variant="danger" :loading="isDeletingTransaction" :disabled="isDeletingTransaction"
+              </Button>
+              <Button variant="danger" :loading="isDeletingTransaction" :disabled="isDeletingTransaction"
                 @click="confirmDeleteTransaction">
                 Xóa
-              </AtomsButton>
+              </Button>
             </div>
           </div>
         </div>
@@ -517,12 +517,12 @@ const handleUndoDelete = async () => {
 
             <div class="space-y-3" v-if="conflictState.type === 'updated'">
               <div class="flex flex-wrap gap-3">
-                <AtomsButton variant="primary" @click="resolveConflictOverwrite">
+                <Button variant="primary" @click="resolveConflictOverwrite">
                   Đè lên thay đổi của tôi
-                </AtomsButton>
-                <AtomsButton variant="secondary" @click="applyServerVersion">
+                </Button>
+                <Button variant="secondary" @click="applyServerVersion">
                   Giữ thay đổi mới nhất
-                </AtomsButton>
+                </Button>
                 <button class="text-sm font-semibold text-blue-600 hover:text-blue-800"
                   @click="toggleConflictDetails">
                   {{ conflictDetailsVisible ? 'Ẩn sự khác biệt' : 'Xem sự khác biệt' }}
@@ -557,12 +557,12 @@ const handleUndoDelete = async () => {
                 Vui lòng tải lại danh sách để lấy dữ liệu mới nhất và tiếp tục thao tác.
               </p>
               <div class="flex flex-wrap gap-3">
-                <AtomsButton variant="danger" @click="handleConflictReload">
+                <Button variant="danger" @click="handleConflictReload">
                   Tải lại
-                </AtomsButton>
-                <AtomsButton variant="ghost" @click="dismissConflict">
+                </Button>
+                <Button variant="ghost" @click="dismissConflict">
                   Đóng
-                </AtomsButton>
+                </Button>
               </div>
             </div>
           </div>

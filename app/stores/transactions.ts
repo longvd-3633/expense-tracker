@@ -368,7 +368,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       const { data, error: updateError } = await supabase
         .from('transactions')
-        .update(payload)
+        .update(updateData)
         .eq('id', id)
         .eq('user_id', session.user.id)
         .select()

@@ -221,17 +221,17 @@ onUnmounted(() => {
 
                   <div class="grid gap-4 md:grid-cols-2">
                     <div>
-                      <AtomsDatePicker v-model="formData.date" label="Ngày" required :error="errors.date"
+                      <DatePicker v-model="formData.date" label="Ngày" required :error="errors.date"
                         @blur="validateField('date')" />
                     </div>
                     <div>
-                      <AtomsInput v-model="formData.amount" type="number" label="Số tiền" placeholder="0" required :min="0"
+                      <Input v-model="formData.amount" type="number" label="Số tiền" placeholder="0" required :min="0"
                         :step="1000" :error="errors.amount" @blur="validateField('amount')" />
                     </div>
                   </div>
 
                   <div>
-                    <AtomsSelect v-model="formData.category" label="Danh mục" placeholder="Chọn danh mục" required
+                    <Select v-model="formData.category" label="Danh mục" placeholder="Chọn danh mục" required
                       :options="categoryOptions" :error="errors.category" @change="validateField('category')" />
                   </div>
 
@@ -247,12 +247,12 @@ onUnmounted(() => {
 
                 <!-- Actions -->
                 <div class="mt-6 flex items-center justify-end space-x-3">
-                  <AtomsButton type="button" variant="ghost" @click="handleClose">
+                  <Button type="button" variant="ghost" @click="handleClose">
                     Hủy
-                  </AtomsButton>
-                  <AtomsButton type="submit" variant="primary" :loading="isSubmitting" :disabled="isSubmitting">
+                  </Button>
+                  <Button type="submit" variant="primary" :loading="isSubmitting" :disabled="isSubmitting">
                     {{ initialData?.category ? 'Cập nhật' : 'Thêm' }}
-                  </AtomsButton>
+                  </Button>
                 </div>
               </form>
             </div>

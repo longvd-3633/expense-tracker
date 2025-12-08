@@ -320,7 +320,7 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
       </div>
 
       <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <MoleculesStatCard v-for="card in statCards" :key="card.key" :label="card.label" :amount="card.amount"
+        <StatCard v-for="card in statCards" :key="card.key" :label="card.label" :amount="card.amount"
           :variant="card.variant" :chip-label="card.chipLabel" :description="card.description">
           <template v-if="card.key === 'income'" #meta>
             <span class="text-xs text-gray-400">{{ incomeShare }}% tổng thu + chi</span>
@@ -328,7 +328,7 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
           <template v-else-if="card.key === 'expense'" #meta>
             <span class="text-xs text-gray-400">{{ expenseShare }}% tổng thu + chi</span>
           </template>
-        </MoleculesStatCard>
+        </StatCard>
       </div>
     </section>
 

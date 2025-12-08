@@ -90,9 +90,9 @@ const calculateGroupTotal = (transactions: Transaction[]) => {
       </svg>
       <p class="text-red-700 font-medium mb-2">Không thể tải dữ liệu</p>
       <p class="text-red-600 text-sm mb-4">{{ error }}</p>
-      <AtomsButton variant="danger" size="sm" @click="emit('retry')">
+      <Button variant="danger" size="sm" @click="emit('retry')">
         Thử lại
-      </AtomsButton>
+      </Button>
     </div>
 
     <!-- Empty State -->
@@ -130,7 +130,7 @@ const calculateGroupTotal = (transactions: Transaction[]) => {
 
         <!-- Transaction Cards -->
         <div class="space-y-3">
-          <MoleculesTransactionCard v-for="transaction in group.transactions" :key="transaction.id"
+          <TransactionCard v-for="transaction in group.transactions" :key="transaction.id"
             :transaction="transaction" @edit="emit('edit', transaction)" @delete="emit('delete', $event)" />
         </div>
       </div>

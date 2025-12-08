@@ -19,6 +19,24 @@ export default defineNuxtConfig({
     },
   },
 
+  components: [
+    {
+      path: '~/components/atoms',
+      pathPrefix: false,
+      global: true,
+    },
+    {
+      path: '~/components/molecules',
+      pathPrefix: false,
+      global: true,
+    },
+    {
+      path: '~/components/organisms',
+      pathPrefix: false,
+      global: true,
+    },
+  ],
+
   runtimeConfig: {
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
