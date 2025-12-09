@@ -59,13 +59,21 @@ export const useCategoriesStore = defineStore('categories', () => {
         isDefault: c.is_default,
       }))
 
-      // Remove duplicates by name and type (in case migration ran multiple times)
+      // Remove duplicates by name and type, prioritizing default categories
       const seenKey = new Map<string, typeof mapped[0]>()
       mapped.forEach(c => {
         const key = `${c.name.toLowerCase()}-${c.type}`
-        if (!seenKey.has(key)) {
+        const existing = seenKey.get(key)
+        
+        // If no existing, add it
+        if (!existing) {
+          seenKey.set(key, c)
+        } 
+        // If existing is not default but current is default, replace with default
+        else if (!existing.isDefault && c.isDefault) {
           seenKey.set(key, c)
         }
+        // Otherwise keep existing
       })
       
       categories.value = Array.from(seenKey.values())

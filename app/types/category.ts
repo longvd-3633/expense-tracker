@@ -15,7 +15,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Lương',
     type: 'income',
     color: '#10B981',
-    icon: 'briefcase',
+    icon: '💼',
     isDefault: true,
   },
   {
@@ -23,7 +23,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Kinh doanh',
     type: 'income',
     color: '#059669',
-    icon: 'chart-bar',
+    icon: '📊',
     isDefault: true,
   },
   {
@@ -31,7 +31,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Đầu tư',
     type: 'income',
     color: '#34D399',
-    icon: 'trending-up',
+    icon: '📈',
     isDefault: true,
   },
   {
@@ -39,7 +39,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Quà tặng',
     type: 'income',
     color: '#6EE7B7',
-    icon: 'gift',
+    icon: '🎁',
     isDefault: true,
   },
   {
@@ -47,7 +47,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Thu nhập khác',
     type: 'income',
     color: '#A7F3D0',
-    icon: 'plus-circle',
+    icon: '💰',
     isDefault: true,
   },
   
@@ -57,7 +57,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Ăn uống',
     type: 'expense',
     color: '#EF4444',
-    icon: 'utensils',
+    icon: '🍽️',
     isDefault: true,
   },
   {
@@ -65,7 +65,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Di chuyển',
     type: 'expense',
     color: '#F97316',
-    icon: 'car',
+    icon: '🚗',
     isDefault: true,
   },
   {
@@ -73,7 +73,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Nhà ở',
     type: 'expense',
     color: '#8B5CF6',
-    icon: 'home',
+    icon: '🏠',
     isDefault: true,
   },
   {
@@ -81,7 +81,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Tiện ích',
     type: 'expense',
     color: '#3B82F6',
-    icon: 'lightning-bolt',
+    icon: '⚡',
     isDefault: true,
   },
   {
@@ -89,7 +89,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Y tế',
     type: 'expense',
     color: '#EC4899',
-    icon: 'heart',
+    icon: '🏥',
     isDefault: true,
   },
   {
@@ -97,7 +97,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Giải trí',
     type: 'expense',
     color: '#F59E0B',
-    icon: 'film',
+    icon: '🎬',
     isDefault: true,
   },
   {
@@ -105,7 +105,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Mua sắm',
     type: 'expense',
     color: '#14B8A6',
-    icon: 'shopping-bag',
+    icon: '🛍️',
     isDefault: true,
   },
   {
@@ -113,7 +113,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Giáo dục',
     type: 'expense',
     color: '#6366F1',
-    icon: 'academic-cap',
+    icon: '📚',
     isDefault: true,
   },
   {
@@ -121,7 +121,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     name: 'Chi phí khác',
     type: 'expense',
     color: '#64748B',
-    icon: 'dots-horizontal',
+    icon: '📝',
     isDefault: true,
   },
 ];
