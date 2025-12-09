@@ -452,14 +452,16 @@ const handleUndoDelete = async () => {
     </div>
 
     <!-- Transaction Filters -->
-    <FilterBar :categories="categoriesStore.categories" :type-filter="filters.typeFilter.value"
-      :selected-categories="filters.selectedCategories.value" :start-date="filters.startDate.value"
-      :end-date="filters.endDate.value" :min-amount="filters.minAmount.value" :max-amount="filters.maxAmount.value"
-      :search-query="filters.searchQuery.value" :result-count="filteredTransactions.length"
-      :has-active-filters="filters.hasActiveFilters.value" :on-type-change="setTypeFilter"
-      :on-category-toggle="filters.toggleCategory" :on-start-date-change="setStartDate" :on-end-date-change="setEndDate"
-      :on-min-amount-change="setMinAmount" :on-max-amount-change="setMaxAmount" :on-search-change="setSearchQuery"
-      :on-clear="filters.resetFilters" />
+    <div class="mb-6">
+      <FilterBar :categories="categoriesStore.categories" :type-filter="filters.typeFilter.value"
+        :selected-categories="filters.selectedCategories.value" :start-date="filters.startDate.value"
+        :end-date="filters.endDate.value" :min-amount="filters.minAmount.value" :max-amount="filters.maxAmount.value"
+        :search-query="filters.searchQuery.value" :result-count="filteredTransactions.length"
+        :has-active-filters="filters.hasActiveFilters.value" :on-type-change="setTypeFilter"
+        :on-category-toggle="filters.toggleCategory" :on-start-date-change="setStartDate"
+        :on-end-date-change="setEndDate" :on-min-amount-change="setMinAmount" :on-max-amount-change="setMaxAmount"
+        :on-search-change="setSearchQuery" :on-clear="filters.resetFilters" />
+    </div>
 
     <!-- Transaction List -->
     <TransactionList :transactions="filteredTransactions" :loading="isLoading" :error="transactionsStore.error"

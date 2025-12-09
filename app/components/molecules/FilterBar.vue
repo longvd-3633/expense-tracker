@@ -57,9 +57,8 @@
 
       <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 md:col-span-2">
         Tìm theo nội dung
-        <input type="search" placeholder="Tìm mô tả, ghi chú hoặc danh mục"
-          class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500"
-          :value="searchQuery" @input="handleSearchInput" />
+        <SearchInput :model-value="searchQuery ?? ''" placeholder="Tìm mô tả, ghi chú hoặc danh mục" :debounce="300"
+          @update:model-value="handleSearchChange" />
       </label>
     </div>
 
@@ -80,6 +79,7 @@
 
 <script setup lang="ts">
 import { toRefs } from 'vue'
+import SearchInput from '~/components/atoms/SearchInput.vue'
 import type { Category } from '~/types/category'
 
 type FilterType = 'all' | 'income' | 'expense'
@@ -140,9 +140,8 @@ const handleAmountInput = (mode: 'min' | 'max', event: Event) => {
   }
 }
 
-const handleSearchInput = (event: Event) => {
-  const target = event.target as HTMLInputElement | null
-  props.onSearchChange?.(target?.value ?? '')
+const handleSearchChange = (value: string) => {
+  props.onSearchChange?.(value)
 }
 
 const selectType = (value: FilterType) => props.onTypeChange?.(value)
