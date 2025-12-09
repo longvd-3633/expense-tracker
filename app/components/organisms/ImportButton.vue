@@ -1,0 +1,133 @@
+<script setup lang="ts">
+const { parseFile, parseResult, reset } = useCSVImport()
+const { formatCurrency } = useFormatters()
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const showPreview = ref(false)
+const showResults = ref(false)
+const isParsing = ref(false)
+const parseError = ref<string | null>(null)
+
+const handleFileSelect = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) return
+
+  isParsing.value = true
+  parseError.value = null
+
+  try {
+    const result = await parseFile(file)
+
+    if (result.success) {
+      showPreview.value = true
+    } else {
+      parseError.value = result.errors.join('\n')
+    }
+  } catch (error: any) {
+    parseError.value = error?.message || 'Lỗi không xác định'
+  } finally {
+    isParsing.value = false
+  }
+
+  // Reset file input
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+}
+
+const openFilePicker = () => {
+  if (isParsing.value) return
+  parseError.value = null
+  fileInputRef.value?.click()
+}
+
+const handleImportComplete = (result: any) => {
+  showPreview.value = false
+  showResults.value = true
+}
+
+const handleClosePreview = () => {
+  showPreview.value = false
+  reset()
+}
+
+const handleCloseResults = () => {
+  showResults.value = false
+  reset()
+}
+
+// Close error toast
+const closeError = () => {
+  parseError.value = null
+}
+</script>
+
+<template>
+  <div>
+    <!-- Hidden file input -->
+    <input ref="fileInputRef" type="file" accept=".csv,text/csv" class="hidden" @change="handleFileSelect" />
+
+    <!-- Import button -->
+    <button @click="openFilePicker" :disabled="isParsing"
+      class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      :class="{ 'opacity-50 cursor-wait': isParsing }">
+      <!-- Loading Spinner -->
+      <svg v-if="isParsing" class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+
+      <!-- Upload Icon -->
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+      </svg>
+
+      <span>{{ isParsing ? 'Đang đọc...' : 'Nhập CSV' }}</span>
+    </button>
+
+    <!-- Error Toast -->
+    <Teleport to="body">
+      <Transition enter-active-class="transition ease-out duration-200" enter-from-class="translate-y-4 opacity-0"
+        enter-to-class="translate-y-0 opacity-100" leave-active-class="transition ease-in duration-150"
+        leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-4 opacity-0">
+        <div v-if="parseError" class="fixed bottom-6 right-6 z-50">
+          <div class="bg-red-600 text-white px-5 py-4 rounded-xl shadow-2xl max-w-md">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p class="font-semibold">Lỗi đọc file CSV</p>
+                  <p class="text-sm text-red-100 mt-1 whitespace-pre-line">{{ parseError }}</p>
+                </div>
+              </div>
+              <button class="text-red-200 hover:text-white" @click="closeError">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Preview modal -->
+    <ImportPreview v-if="showPreview && parseResult" :parse-result="parseResult" @close="handleClosePreview"
+      @complete="handleImportComplete" />
+
+    <!-- Results modal -->
+    <ImportResults v-if="showResults" @close="handleCloseResults" />
+  </div>
+</template>
