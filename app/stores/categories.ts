@@ -165,9 +165,15 @@ export const useCategoriesStore = defineStore('categories', () => {
       // Update local state
       const index = categories.value.findIndex(c => c.id === id)
       if (index !== -1) {
+        const current = categories.value[index]!
         categories.value[index] = {
-          ...categories.value[index],
-          ...updates,
+          id: current.id,
+          userId: current.userId,
+          name: updates.name ?? current.name,
+          type: updates.type ?? current.type,
+          color: updates.color ?? current.color,
+          icon: updates.icon ?? current.icon,
+          isDefault: current.isDefault,
         }
       }
 
