@@ -46,7 +46,7 @@ const handleImport = async () => {
     ...props.parseResult.validRows,
     ...props.parseResult.duplicateRows
   ]
-  
+
   const result = await importTransactions(allRows, skipDuplicates.value)
   emit('complete', result)
 }
@@ -226,7 +226,8 @@ const formatFileSize = (bytes: number): string => {
               <div v-for="row in parseResult.duplicateRows" :key="row.index"
                 class="bg-white border border-yellow-200 rounded-lg p-3">
                 <div class="text-sm text-gray-700">
-                  Dòng {{ row.index + 2 }}: {{ formatDate(row.parsed!.date) }} | {{ row.parsed!.type === 'income' ? 'Thu' : 'Chi' }} | {{ formatCurrency(row.parsed!.amount) }} | {{ row.parsed!.category }}
+                  Dòng {{ row.index + 2 }}: {{ formatDate(row.parsed!.date) }} | {{ row.parsed!.type === 'income' ?
+                  'Thu' : 'Chi' }} | {{ formatCurrency(row.parsed!.amount) }} | {{ row.parsed!.category }}
                 </div>
                 <div class="text-xs text-gray-500 mt-1">{{ row.parsed!.description }}</div>
               </div>

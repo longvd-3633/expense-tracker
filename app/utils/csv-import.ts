@@ -130,7 +130,52 @@ const validateCSVData = (data: CSVRow[], fileName: string, fileSize: number): Pa
       errors: ['File CSV không có dữ liệu hợp lệ']
     }
   }
-  const actualColumns = Object.keys(firstRow).map(k => k.toLowerCase().trim())
+
+  // Column mapping: support both English and Vietnamese column names
+  const columnMapping: Record<string, string> = {
+    // English names
+    'date': 'date',
+    'type': 'type',
+    'amount': 'amount',
+    'category': 'category',
+    'description': 'description',
+    // Vietnamese names (from export)
+    'ngày': 'date',
+    'loại': 'type',
+    'số tiền': 'amount',
+    'danh mục': 'category',
+    'mô tả': 'description'
+  }
+
+  // Normalize column names
+  const normalizedData = data.map(row => {
+    const normalized: any = {}
+    Object.keys(row).forEach(key => {
+      const normalizedKey = key.toLowerCase().trim()
+      const mappedKey = columnMapping[normalizedKey]
+      if (mappedKey) {
+        normalized[mappedKey] = row[key as keyof CSVRow]
+      }
+    })
+    return normalized as CSVRow
+  })
+
+  // Check if we have all required columns after normalization
+  const firstNormalizedRow = normalizedData[0]
+  if (!firstNormalizedRow) {
+    return {
+      success: false,
+      fileName,
+      fileSize,
+      totalRows: data.length,
+      validRows: [],
+      invalidRows: [],
+      duplicateRows: [],
+      errors: ['File CSV không có dữ liệu hợp lệ']
+    }
+  }
+
+  const actualColumns = Object.keys(firstNormalizedRow)
   const requiredColumns = ['date', 'type', 'amount', 'category', 'description']
   const missingColumns = requiredColumns.filter(col => !actualColumns.includes(col))
 
@@ -146,15 +191,6 @@ const validateCSVData = (data: CSVRow[], fileName: string, fileSize: number): Pa
       errors: [`Thiếu cột bắt buộc: ${missingColumns.join(', ')}`]
     }
   }
-
-  // Normalize column names to lowercase
-  const normalizedData = data.map(row => {
-    const normalized: any = {}
-    Object.keys(row).forEach(key => {
-      normalized[key.toLowerCase().trim()] = row[key as keyof CSVRow]
-    })
-    return normalized as CSVRow
-  })
 
   // Validate each row
   const parsedRows: ParsedRow[] = normalizedData.map((row, index) => validateRow(row, index))

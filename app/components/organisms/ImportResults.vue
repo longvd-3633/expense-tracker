@@ -85,8 +85,8 @@ const result = computed(() => ({
             <div v-if="result.duplicatesSkipped > 0"
               class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
               <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -113,8 +113,7 @@ const result = computed(() => ({
             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
               <p class="text-sm font-semibold text-red-700 mb-2">Chi tiết lỗi:</p>
               <div class="space-y-1 max-h-32 overflow-y-auto">
-                <p v-for="(error, index) in result.errorMessages.slice(0, 5)" :key="index"
-                  class="text-xs text-red-600">
+                <p v-for="(error, index) in result.errorMessages.slice(0, 5)" :key="index" class="text-xs text-red-600">
                   {{ error }}
                 </p>
                 <p v-if="result.errorMessages.length > 5" class="text-xs text-red-500 italic">
