@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import FilterBar from '~/components/molecules/FilterBar.vue'
 import type { Transaction, TransactionInput } from '~/types/transaction'
+import { useFilters, type FilterType, type FilterQueryInput } from '~/composables/useFilters'
+import type { LocationQuery } from 'vue-router'
 
 const transactionsStore = useTransactionsStore()
 const categoriesStore = useCategoriesStore()
@@ -173,7 +176,7 @@ const formInitialData = computed(() => {
     date: new Date(editingTransaction.value.date),
     type: editingTransaction.value.type,
     amount: editingTransaction.value.amount,
-    category: editingTransaction.value.category,
+    category: editingTransaction.value.category ?? undefined,
     description: editingTransaction.value.description,
     tags: editingTransaction.value.tags,
   }
@@ -187,6 +190,72 @@ const formatCategoryLabel = (categoryId?: string | null) => {
 const formatTagList = (tags?: string[] | null) => {
   if (!tags || !tags.length) return 'Không có'
   return tags.join(', ')
+}
+
+const filters = useFilters()
+const route = useRoute()
+const router = useRouter()
+const isSyncingRouteQuery = ref(false)
+
+const normalizeQuery = (input: LocationQuery) => {
+  const normalized: Record<string, string> = {}
+  Object.entries(input).forEach(([key, value]) => {
+    if (value === null || value === undefined) return
+    const entries = Array.isArray(value) ? value : [value]
+    normalized[key] = entries.map(String).join(',')
+  })
+  return normalized
+}
+
+watch(
+  () => route.query,
+  (query) => {
+    isSyncingRouteQuery.value = true
+    filters.setFromQuery(query as FilterQueryInput)
+    isSyncingRouteQuery.value = false
+  },
+  { immediate: true, deep: true }
+)
+
+watch(
+  () => filters.queryString,
+  () => {
+    if (isSyncingRouteQuery.value) return
+    const nextQuery = filters.buildQuery()
+    const currentQuery = normalizeQuery(route.query)
+    if (JSON.stringify(nextQuery) === JSON.stringify(currentQuery)) return
+    router.replace({ query: nextQuery })
+  }
+)
+
+const filteredTransactions = computed(() =>
+  filters.filterTransactions(transactionsStore.sortedTransactions, (categoryId) =>
+    categoriesStore.getCategoryById(categoryId)?.name
+  )
+)
+
+const setTypeFilter = (value: FilterType) => {
+  filters.typeFilter.value = value
+}
+
+const setStartDate = (value: string | null) => {
+  filters.startDate.value = value
+}
+
+const setEndDate = (value: string | null) => {
+  filters.endDate.value = value
+}
+
+const setMinAmount = (value: number | null) => {
+  filters.minAmount.value = value
+}
+
+const setMaxAmount = (value: number | null) => {
+  filters.maxAmount.value = value
+}
+
+const setSearchQuery = (value: string) => {
+  filters.searchQuery.value = value
 }
 
 const conflictDiffs = computed(() => {
@@ -377,20 +446,28 @@ const handleUndoDelete = async () => {
       </Button>
     </div>
 
+    <!-- Transaction Filters -->
+    <FilterBar :categories="categoriesStore.categories" :type-filter="filters.typeFilter.value"
+      :selected-categories="filters.selectedCategories.value" :start-date="filters.startDate.value"
+      :end-date="filters.endDate.value" :min-amount="filters.minAmount.value" :max-amount="filters.maxAmount.value"
+      :search-query="filters.searchQuery.value" :result-count="filteredTransactions.length"
+      :has-active-filters="filters.hasActiveFilters.value" :on-type-change="setTypeFilter"
+      :on-category-toggle="filters.toggleCategory" :on-start-date-change="setStartDate" :on-end-date-change="setEndDate"
+      :on-min-amount-change="setMinAmount" :on-max-amount-change="setMaxAmount" :on-search-change="setSearchQuery"
+      :on-clear="filters.resetFilters" />
+
     <!-- Transaction List -->
-    <TransactionList :transactions="transactionsStore.sortedTransactions" :loading="isLoading"
-      :error="transactionsStore.error" @edit="handleEditTransaction" @delete="requestDeleteTransaction"
-      @retry="handleRetry" />
+    <TransactionList :transactions="filteredTransactions" :loading="isLoading" :error="transactionsStore.error"
+      @edit="handleEditTransaction" @delete="requestDeleteTransaction" @retry="handleRetry" />
 
     <!-- Transaction Form Modal -->
-    <TransactionForm v-model:is-open="isFormOpen" :initial-data="formInitialData"
-      @submit="handleSubmit" />
+    <TransactionForm v-model:is-open="isFormOpen" :initial-data="formInitialData" @submit="handleSubmit" />
 
     <!-- Delete Confirmation Modal -->
     <Teleport to="body">
       <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition ease-in duration-150"
-        leave-from-class="opacity-100" leave-to-class="opacity-0">
+        enter-to-class="opacity-100" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100"
+        leave-to-class="opacity-0">
         <div v-if="deleteTarget" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
           <div class="absolute inset-0 bg-black bg-opacity-50" @click="resetDeleteState" />
           <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
@@ -481,10 +558,9 @@ const handleUndoDelete = async () => {
     <!-- Conflict Resolution Modal -->
     <Teleport to="body">
       <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0"
-        enter-to-class="opacity-100" leave-active-class="transition ease-in duration-150"
-        leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="conflictState"
-          class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+        enter-to-class="opacity-100" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100"
+        leave-to-class="opacity-0">
+        <div v-if="conflictState" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
           <div class="absolute inset-0 bg-black bg-opacity-40" />
           <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl space-y-5">
             <div class="flex items-start justify-between gap-4">
@@ -523,8 +599,7 @@ const handleUndoDelete = async () => {
                 <Button variant="secondary" @click="applyServerVersion">
                   Giữ thay đổi mới nhất
                 </Button>
-                <button class="text-sm font-semibold text-blue-600 hover:text-blue-800"
-                  @click="toggleConflictDetails">
+                <button class="text-sm font-semibold text-blue-600 hover:text-blue-800" @click="toggleConflictDetails">
                   {{ conflictDetailsVisible ? 'Ẩn sự khác biệt' : 'Xem sự khác biệt' }}
                 </button>
               </div>

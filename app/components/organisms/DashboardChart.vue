@@ -11,6 +11,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js'
+import type { TooltipItem } from 'chart.js'
 
 Chart.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler)
 
@@ -35,6 +36,7 @@ const props = withDefaults(defineProps<DashboardChartProps>(), {
 })
 
 const { formatCurrency } = useFormatters()
+const tooltipDateFormatter = new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: 'short' })
 
 const hasValues = computed(() => {
   return props.income.some(value => value > 0) || props.expense.some(value => value > 0)
@@ -69,32 +71,73 @@ const chartData = computed(() => ({
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  animation: { duration: 300 },
+  animation: { duration: 420, easing: 'easeOutCubic' as const },
+  layout: { padding: { top: 12, bottom: 16, left: 0, right: 0 } },
   interaction: { intersect: false, mode: 'index' as const },
   plugins: {
     legend: {
       display: true,
+      position: 'bottom' as const,
+      align: 'end' as const,
       labels: {
         usePointStyle: true,
         pointStyle: 'circle',
-        padding: 20,
+        padding: 18,
+        boxWidth: 10,
+        font: { size: 12 },
       },
-      position: 'bottom' as const,
+      onClick(event: any, legendItem: any, legend: any) {
+        const ci = legend.chart
+        const datasetIndex = legendItem.datasetIndex ?? 0
+        const meta = ci.getDatasetMeta(datasetIndex)
+        meta.hidden = !meta.hidden
+        ci.update()
+      },
     },
     tooltip: {
+      backgroundColor: '#0F172A',
+      titleColor: '#F8FAFC',
+      bodyColor: '#E2E8F0',
+      borderColor: '#1E293B',
+      borderWidth: 1,
+      padding: 10,
+      caretPadding: 6,
       callbacks: {
-        label(context: any) {
+        title(context: TooltipItem<'line'>[]) {
+          const label = context[0]?.label
+          if (!label) return ''
+          const parsedDate = new Date(label)
+          const formatted = Number.isNaN(parsedDate.getTime()) ? label : tooltipDateFormatter.format(parsedDate)
+          return `Ngày ${formatted}`
+        },
+        label(context: TooltipItem<'line'>) {
           const datasetLabel = context.dataset?.label ?? ''
-          const value = typeof context.parsed?.y === 'number' ? context.parsed.y : context.parsed
-          return `${datasetLabel}: ${formatCurrency(value || 0)}`
+          const parsedValue =
+            typeof context.parsed === 'number'
+              ? context.parsed
+              : typeof context.parsed?.y === 'number'
+                ? context.parsed.y
+                : 0
+          return `${datasetLabel}: ${formatCurrency(parsedValue)}`
+        },
+        footer(context: TooltipItem<'line'>[]) {
+          if (!context.length) return ''
+          const total = context.reduce((acc, item) => acc + (item.parsed?.y ?? 0), 0)
+          return `Tổng: ${formatCurrency(total)}`
         },
       },
     },
   },
   scales: {
     x: {
-      grid: { display: false },
-      ticks: { maxRotation: 0, autoSkip: true },
+      grid: { color: 'rgba(15,23,42,0.05)', borderColor: '#E2E8F0' },
+      ticks: {
+        maxRotation: 0,
+        autoSkip: true,
+        color: '#475569',
+        padding: 6,
+        font: { size: 12 },
+      },
     },
     y: {
       beginAtZero: true,
@@ -103,15 +146,24 @@ const chartOptions = computed(() => ({
           const numericValue = typeof value === 'string' ? Number(value) : value
           return formatCurrency(numericValue)
         },
+        color: '#64748B',
+        padding: 8,
       },
-      grid: { color: '#F1F5F9' },
+      grid: {
+        drawBorder: false,
+        borderDash: [4, 4],
+        color(context: any) {
+          const value = context?.tick?.value
+          return value === 0 ? '#94A3B8' : '#E2E8F0'
+        },
+      },
     },
   },
 }))
 </script>
 
 <template>
-  <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+  <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm h-full flex flex-col">
     <header class="mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">{{ title }}</p>
       <p v-if="periodLabel" class="text-sm text-gray-500">{{ periodLabel }}</p>
@@ -119,14 +171,14 @@ const chartOptions = computed(() => ({
 
     <div v-if="loading" class="h-72 w-full animate-pulse rounded-xl bg-slate-50" />
 
-    <div v-else>
+    <div v-else class="flex-1 flex flex-col">
       <div v-if="!hasValues"
-        class="rounded-xl border border-dashed border-gray-200 bg-slate-50/60 p-8 text-center text-sm text-gray-500">
+        class="rounded-xl border border-dashed border-gray-200 bg-slate-50/60 p-8 text-center text-sm text-gray-500 flex-1 flex items-center justify-center">
         {{ emptyLabel }}
       </div>
 
       <ClientOnly v-else>
-        <div class="h-72 w-full">
+        <div class="flex-1 w-full min-h-[300px]">
           <Line :data="chartData" :options="chartOptions" />
         </div>
         <template #fallback>

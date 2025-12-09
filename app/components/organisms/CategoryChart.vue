@@ -27,6 +27,7 @@ const { formatCurrency } = useFormatters()
 
 const totalValue = computed(() => props.slices.reduce((sum, slice) => sum + slice.value, 0))
 const hasData = computed(() => totalValue.value > 0)
+const minAngle = computed(() => (props.slices.length ? Math.PI * 0.02 : 0))
 
 const chartData = computed(() => ({
   labels: props.slices.map(slice => slice.label),
@@ -45,6 +46,7 @@ const chartOptions = computed(() => ({
   maintainAspectRatio: false,
   cutout: '60%',
   animation: { duration: 300 },
+  layout: { padding: 20 },
   onClick: (_event: any, elements: any[]) => {
     if (elements.length > 0) {
       const index = elements[0].index
@@ -58,13 +60,24 @@ const chartOptions = computed(() => ({
     legend: { display: false },
     tooltip: {
       callbacks: {
+        title(context: any) {
+          return context[0]?.label || ''
+        },
         label(context: any) {
           const label = context.label || ''
           const value = typeof context.parsed === 'number' ? context.parsed : 0
-          const percentage = totalValue.value ? ((value / totalValue.value) * 100).toFixed(1) : '0'
-          return `${label}: ${formatCurrency(value)} (${percentage}%)`
+          const percentage = totalValue.value ? ((value / totalValue.value) * 100).toFixed(1) : '0.0'
+          return `${label}: ${formatCurrency(value)} · ${percentage}%`
         },
       },
+    },
+  },
+  elements: {
+    arc: {
+      borderWidth: 2,
+      borderColor: '#ffffff',
+      hoverOffset: 14,
+      minAngle: minAngle.value,
     },
   },
 }))
@@ -72,13 +85,13 @@ const chartOptions = computed(() => ({
 const legendItems = computed(() =>
   props.slices.map(slice => ({
     ...slice,
-    percentage: totalValue.value ? Math.round((slice.value / totalValue.value) * 100) : 0,
+    percentage: totalValue.value ? ((slice.value / totalValue.value) * 100).toFixed(1) : '0.0',
   }))
 )
 </script>
 
 <template>
-  <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+  <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm h-full flex flex-col">
     <header class="mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-500">{{ title }}</p>
       <p class="text-sm text-gray-500">Tổng chi: {{ formatCurrency(totalValue) }}</p>
@@ -96,9 +109,9 @@ const legendItems = computed(() =>
         <ClientOnly>
           <div class="relative mx-auto h-64 w-64 cursor-pointer">
             <Doughnut :data="chartData" :options="chartOptions" />
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+            <div class="absolute inset-0 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
               <span class="text-sm uppercase tracking-widest text-gray-400">Tổng chi</span>
-              <span class="text-lg font-semibold text-gray-900">{{ formatCurrency(totalValue) }}</span>
+              <span class="text-lg font-semibold text-gray-900 whitespace-nowrap">{{ formatCurrency(totalValue) }}</span>
             </div>
           </div>
           <template #fallback>

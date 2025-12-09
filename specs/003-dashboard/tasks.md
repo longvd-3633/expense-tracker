@@ -346,31 +346,31 @@ Each task follows this format:
 
 ### Composables & State
 
-- [ ] T150 [P] [US4] Create app/composables/useFilters.ts with filter state management (types, categories, dateRange, amountRange, searchQuery)
-- [ ] T151 [P] [US4] Implement filterTransactions() function in useFilters.ts (apply all active filters)
-- [ ] T152 [P] [US4] Add URL sync logic in useFilters.ts (read/write filter state to query params)
-- [ ] T153 [P] [US4] Add clearFilters() function in useFilters.ts
+- [X] T150 [P] [US4] Create app/composables/useFilters.ts with filter state management (types, categories, dateRange, amountRange, searchQuery)
+- [X] T151 [P] [US4] Implement filterTransactions() function in useFilters.ts (apply all active filters)
+- [X] T152 [P] [US4] Add URL sync logic in useFilters.ts (read/write filter state to query params)
+- [X] T153 [P] [US4] Add clearFilters() function in useFilters.ts
 
 ### UI Components
 
-- [ ] T154 [P] [US4] Create app/components/molecules/FilterBar.vue with all filter controls - Design with `/ui-ux-pro-max` command
-- [ ] T155 [P] [US4] Create app/components/atoms/SearchInput.vue with debounced input (300ms) - Design with `/ui-ux-pro-max` command
-- [ ] T156 [US4] Add type filter in FilterBar.vue (All/Income/Expense toggle buttons)
-- [ ] T157 [US4] Add category multi-select in FilterBar.vue (checkboxes with category colors)
-- [ ] T158 [US4] Add date range picker in FilterBar.vue (start date, end date inputs)
-- [ ] T159 [US4] Add amount range inputs in FilterBar.vue (min, max number inputs)
-- [ ] T160 [US4] Add search box in FilterBar.vue (search by description)
-- [ ] T161 [US4] Add "Clear Filters" button in FilterBar.vue
-- [ ] T162 [US4] Add results count display in FilterBar.vue ("[X] transactions found")
-- [ ] T163 [US4] Style FilterBar.vue for responsive layout (collapse on mobile, expand on desktop) - Design with `/ui-ux-pro-max` command
+- [X] T154 [P] [US4] Create app/components/molecules/FilterBar.vue with all filter controls - Design with `/ui-ux-pro-max` command
+- [X] T155 [P] [US4] Create app/components/atoms/SearchInput.vue with debounced input (300ms) - Design with `/ui-ux-pro-max` command
+- [X] T156 [US4] Add type filter in FilterBar.vue (All/Income/Expense toggle buttons)
+- [X] T157 [US4] Add category multi-select in FilterBar.vue (checkboxes with category colors)
+- [X] T158 [US4] Add date range picker in FilterBar.vue (start date, end date inputs)
+- [X] T159 [US4] Add amount range inputs in FilterBar.vue (min, max number inputs)
+- [X] T160 [US4] Add search box in FilterBar.vue (search by description)
+- [X] T161 [US4] Add "Clear Filters" button in FilterBar.vue
+- [X] T162 [US4] Add results count display in FilterBar.vue ("[X] transactions found")
+- [X] T163 [US4] Style FilterBar.vue for responsive layout (collapse on mobile, expand on desktop) - Design with `/ui-ux-pro-max` command
 
 ### Integration
 
-- [ ] T164 [US4] Add FilterBar component to app/pages/transactions/index.vue above transaction list
-- [ ] T165 [US4] Connect filters to TransactionList (pass filtered transactions)
-- [ ] T166 [US4] Implement real-time search (debounced, update list as user types)
-- [ ] T167 [US4] Update URL when filters change (use Nuxt's useRouter)
-- [ ] T168 [US4] Load filters from URL on page mount (restore filter state)
+- [X] T164 [US4] Add FilterBar component to app/pages/transactions/index.vue above transaction list
+- [X] T165 [US4] Connect filters to TransactionList (pass filtered transactions)
+- [X] T166 [US4] Implement real-time search (debounced, update list as user types)
+- [X] T167 [US4] Update URL when filters change (use Nuxt's useRouter)
+- [X] T168 [US4] Load filters from URL on page mount (restore filter state)
 
 ### Testing
 

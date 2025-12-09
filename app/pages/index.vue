@@ -332,7 +332,7 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
       </div>
     </section>
 
-    <section v-if="!isLoading && stats.count > 0" class="grid grid-cols-1 gap-6 lg:grid-cols-[2fr,1fr]">
+    <section v-if="!isLoading && stats.count > 0" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <DashboardChart :labels="lineChartData.labels" :income="lineChartData.income" :expense="lineChartData.expense"
         :loading="isLoading" :period-label="rangeLabel" />
       <CategoryChart :slices="categoryChartSlices" :loading="isLoading" @slice-click="handleCategoryClick" />
