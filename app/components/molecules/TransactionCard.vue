@@ -1,5 +1,23 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
 import type { Transaction } from '~/types/transaction'
+import {
+  Briefcase,
+  ChartBar,
+  TrendingUp,
+  Gift,
+  PlusCircle,
+  Utensils,
+  Car,
+  Home,
+  Bolt,
+  Heart,
+  Film,
+  ShoppingBag,
+  University,
+  MoreHorizontal,
+  Cake,
+} from 'lucide-vue-next'
 
 interface Props {
   transaction: Transaction
@@ -20,6 +38,29 @@ const category = computed(() => {
   return categoriesStore.getCategoryById(props.transaction.category)
 })
 
+const iconMap: Record<string, Component> = {
+  'briefcase': Briefcase,
+  'chart-bar': ChartBar,
+  'trending-up': TrendingUp,
+  'gift': Gift,
+  'plus-circle': PlusCircle,
+  'utensils': Utensils,
+  'car': Car,
+  'home': Home,
+  'lightning-bolt': Bolt,
+  'heart': Heart,
+  'film': Film,
+  'shopping-bag': ShoppingBag,
+  'cake': Cake,
+  'academic-cap': University,
+  'dots-horizontal': MoreHorizontal,
+}
+
+const categoryIconComponent = computed(() => {
+  const iconName = category.value?.icon
+  return iconName ? iconMap[iconName] : undefined
+})
+
 const amountColor = computed(() => {
   return props.transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
 })
@@ -36,8 +77,10 @@ const amountPrefix = computed(() => {
       <div class="flex items-start space-x-3 flex-1">
         <div v-if="category" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
           :style="{ backgroundColor: category.color + '20' }">
-          <span class="text-xl">
-            {{ category.icon || '📁' }}
+          <component v-if="categoryIconComponent" :is="categoryIconComponent" class="h-5 w-5 text-current"
+            aria-hidden="true" />
+          <span v-else class="text-xl">
+            {{ category?.icon || '📁' }}
           </span>
         </div>
 
