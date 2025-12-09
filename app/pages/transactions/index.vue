@@ -420,6 +420,8 @@ const handleUndoDelete = async () => {
       </div>
 
       <div class="flex items-center gap-3">
+        <ImportButton />
+
         <ExportButton :transactions="transactionsStore.transactions" :filtered-transactions="filteredTransactions"
           :is-filtered="filters.hasActiveFilters.value" />
 
