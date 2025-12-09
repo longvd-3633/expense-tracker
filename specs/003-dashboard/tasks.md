@@ -402,23 +402,23 @@ Each task follows this format:
 
 ### Composables & Utilities
 
-- [ ] T177 [P] [US5] Create app/composables/useCSVExport.ts with export logic using PapaParse
-- [ ] T178 [P] [US5] Implement exportTransactions() function in useCSVExport.ts (format data, generate CSV, trigger download)
-- [ ] T179 [P] [US5] Add UTF-8 BOM to CSV output in useCSVExport.ts for Excel compatibility
-- [ ] T180 [P] [US5] Format transaction data in useCSVExport.ts (map category ID to name, format date and amount)
+- [X] T177 [P] [US5] Create app/composables/useCSVExport.ts with export logic using PapaParse
+- [X] T178 [P] [US5] Implement exportTransactions() function in useCSVExport.ts (format data, generate CSV, trigger download)
+- [X] T179 [P] [US5] Add UTF-8 BOM to CSV output in useCSVExport.ts for Excel compatibility
+- [X] T180 [P] [US5] Format transaction data in useCSVExport.ts (map category ID to name, format date and amount)
 
 ### UI Component
 
-- [ ] T181 [P] [US5] Create app/components/organisms/ExportButton.vue with export options (All/Filtered toggle) - Design with `/ui-ux-pro-max` command
-- [ ] T182 [US5] Add export all functionality in ExportButton.vue (exports all user transactions)
-- [ ] T183 [US5] Add export filtered functionality in ExportButton.vue (exports currently filtered transactions)
-- [ ] T184 [US5] Add loading state in ExportButton.vue (disable button during export)
-- [ ] T185 [US5] Add success toast notification after export ("Đã xuất [X] giao dịch")
+- [X] T181 [P] [US5] Create app/components/organisms/ExportButton.vue with export options (All/Filtered toggle) - Design with `/ui-ux-pro-max` command
+- [X] T182 [US5] Add export all functionality in ExportButton.vue (exports all user transactions)
+- [X] T183 [US5] Add export filtered functionality in ExportButton.vue (exports currently filtered transactions)
+- [X] T184 [US5] Add loading state in ExportButton.vue (disable button during export)
+- [X] T185 [US5] Add success toast notification after export ("Đã xuất [X] giao dịch")
 
 ### Integration
 
-- [ ] T186 [US5] Add ExportButton component to app/pages/transactions/index.vue (top right corner)
-- [ ] T187 [US5] Pass current filter state to ExportButton (to export filtered results)
+- [X] T186 [US5] Add ExportButton component to app/pages/transactions/index.vue (top right corner)
+- [X] T187 [US5] Pass current filter state to ExportButton (to export filtered results)
 
 ### Testing
 
@@ -448,29 +448,29 @@ Each task follows this format:
 
 ### Store & State
 
-- [ ] T193 [P] [US7] Create app/stores/settings.ts with Supabase integration for user_settings table
-- [ ] T194 [P] [US7] Implement fetchSettings() action in app/stores/settings.ts (SELECT from user_settings)
-- [ ] T195 [P] [US7] Implement updateSettings() action in app/stores/settings.ts (UPSERT to user_settings)
-- [ ] T196 [P] [US7] Add default settings values in app/stores/settings.ts (VND, DD/MM/YYYY, 1.000.000, dashboard, system)
+- [X] T193 [P] [US7] Create app/stores/settings.ts with Supabase integration for user_settings table
+- [X] T194 [P] [US7] Implement fetchSettings() action in app/stores/settings.ts (SELECT from user_settings)
+- [X] T195 [P] [US7] Implement updateSettings() action in app/stores/settings.ts (UPSERT to user_settings)
+- [X] T196 [P] [US7] Add default settings values in app/stores/settings.ts (VND, DD/MM/YYYY, 1.000.000, dashboard, system)
 
 ### UI Components
 
-- [ ] T197 [P] [US7] Create app/pages/settings.vue with settings form - Design with `/ui-ux-pro-max` command
-- [ ] T198 [US7] Add currency selector in app/pages/settings.vue (VND/USD radio buttons)
-- [ ] T199 [US7] Add date format selector in app/pages/settings.vue (DD/MM/YYYY / YYYY-MM-DD radio buttons)
-- [ ] T200 [US7] Add number format selector in app/pages/settings.vue (1.000.000 / 1,000,000 radio buttons)
-- [ ] T201 [US7] Add default view selector in app/pages/settings.vue (Dashboard/Transactions radio buttons)
-- [ ] T202 [US7] Add theme selector in app/pages/settings.vue (Light/Dark/System radio buttons)
-- [ ] T203 [US7] Add save button in app/pages/settings.vue with loading state
-- [ ] T204 [US7] Add reset to defaults button in app/pages/settings.vue
-- [ ] T205 [US7] Style settings page with sections and clear labels - Design with `/ui-ux-pro-max` command
+- [X] T197 [P] [US7] Create app/pages/settings.vue with settings form - Design with `/ui-ux-pro-max` command
+- [X] T198 [US7] Add currency selector in app/pages/settings.vue (VND/USD radio buttons)
+- [X] T199 [US7] Add date format selector in app/pages/settings.vue (DD/MM/YYYY / YYYY-MM-DD radio buttons)
+- [X] T200 [US7] Add number format selector in app/pages/settings.vue (1.000.000 / 1,000,000 radio buttons)
+- [X] T201 [US7] Add default view selector in app/pages/settings.vue (Dashboard/Transactions radio buttons)
+- [X] T202 [US7] Add theme selector in app/pages/settings.vue (Light/Dark/System radio buttons)
+- [X] T203 [US7] Add save button in app/pages/settings.vue with loading state
+- [X] T204 [US7] Add reset to defaults button in app/pages/settings.vue
+- [X] T205 [US7] Style settings page with sections and clear labels - Design with `/ui-ux-pro-max` command
 
 ### Integration
 
-- [ ] T206 [US7] Update useFormatters.ts to use settings from store (formatCurrency uses numberFormat, formatDate uses dateFormat)
-- [ ] T207 [US7] Apply theme preference to app (add theme class to document root)
-- [ ] T208 [US7] Implement default view redirect (after login, go to user's preferred view)
-- [ ] T209 [US7] Load user settings on app initialization (in middleware or app setup)
+- [X] T206 [US7] Update useFormatters.ts to use settings from store (formatCurrency uses numberFormat, formatDate uses dateFormat)
+- [X] T207 [US7] Apply theme preference to app (add theme class to document root)
+- [X] T208 [US7] Implement default view redirect (after login, go to user's preferred view)
+- [X] T209 [US7] Load user settings on app initialization (in middleware or app setup)
 
 ### Testing
 
@@ -502,21 +502,21 @@ Each task follows this format:
 
 ### Store Enhancements
 
-- [ ] T218 [P] [US6] Add actions to app/stores/categories.ts: createCategory(name, type, color, icon)
-- [ ] T219 [P] [US6] Add actions to app/stores/categories.ts: updateCategory(id, updates)
-- [ ] T220 [P] [US6] Add actions to app/stores/categories.ts: deleteCategory(id)
-- [ ] T221 [P] [US6] Add validation in app/stores/categories.ts: check if category in use before delete
+- [X] T218 [P] [US6] Add actions to app/stores/categories.ts: createCategory(name, type, color, icon)
+- [X] T219 [P] [US6] Add actions to app/stores/categories.ts: updateCategory(id, updates)
+- [X] T220 [P] [US6] Add actions to app/stores/categories.ts: deleteCategory(id)
+- [X] T221 [P] [US6] Add validation in app/stores/categories.ts: check if category in use before delete
 
 ### UI Components
 
-- [ ] T222 [P] [US6] Create app/pages/categories/index.vue with category list and add button - Design with `/ui-ux-pro-max` command
-- [ ] T223 [P] [US6] Create app/components/organisms/CategoryForm.vue modal with form fields (name, type, color, icon) - Design with `/ui-ux-pro-max` command
-- [ ] T224 [P] [US6] Create app/components/atoms/ColorPicker.vue for color selection - Design with `/ui-ux-pro-max` command
-- [ ] T225 [US6] Add category list display in app/pages/categories/index.vue (separate default and custom)
-- [ ] T226 [US6] Add edit button on custom categories only (not default)
-- [ ] T227 [US6] Add delete button with confirmation on custom categories
-- [ ] T228 [US6] Implement validation in CategoryForm.vue (name required, max length, unique name check)
-- [ ] T229 [US6] Add usage check before delete (show warning if category has transactions)
+- [X] T222 [P] [US6] Create app/pages/categories/index.vue with category list and add button - Design with `/ui-ux-pro-max` command
+- [X] T223 [P] [US6] Create app/components/organisms/CategoryForm.vue modal with form fields (name, type, color, icon) - Design with `/ui-ux-pro-max` command
+- [X] T224 [P] [US6] Create app/components/atoms/ColorPicker.vue for color selection - Design with `/ui-ux-pro-max` command
+- [X] T225 [US6] Add category list display in app/pages/categories/index.vue (separate default and custom)
+- [X] T226 [US6] Add edit button on custom categories only (not default)
+- [X] T227 [US6] Add delete button with confirmation on custom categories
+- [X] T228 [US6] Implement validation in CategoryForm.vue (name required, max length, unique name check)
+- [X] T229 [US6] Add usage check before delete (show warning if category has transactions)
 
 ### Testing
 
@@ -537,12 +537,12 @@ Each task follows this format:
 
 ### Code Quality & Documentation
 
-- [ ] T236 [P] Run TypeScript type check: `npx nuxi typecheck` (fix all errors)
-- [ ] T237 [P] Run linter: `npm run lint` (fix all warnings)
-- [ ] T238 [P] Code cleanup and refactoring (remove unused imports, consistent naming)
-- [ ] T239 [P] Update README.md with setup instructions, features list, tech stack
-- [ ] T240 [P] Add JSDoc comments to complex functions in composables
-- [ ] T241 [P] Create .env.example with required environment variables (without actual keys)
+- [X] T236 [P] Run TypeScript type check: `npx nuxi typecheck` (fix all errors)
+- [X] T237 [P] Run linter: `npm run lint` (fix all warnings)
+- [X] T238 [P] Code cleanup and refactoring (remove unused imports, consistent naming)
+- [X] T239 [P] Update README.md with setup instructions, features list, tech stack
+- [X] T240 [P] Add JSDoc comments to complex functions in composables
+- [X] T241 [P] Create .env.example with required environment variables (without actual keys)
 
 ### Performance & Optimization
 

@@ -419,13 +419,18 @@ const handleUndoDelete = async () => {
         <p class="text-gray-600">Quản lý thu chi của bạn</p>
       </div>
 
-      <Button variant="primary" size="lg" @click="handleAddTransaction">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        Thêm giao dịch
-      </Button>
+      <div class="flex items-center gap-3">
+        <ExportButton :transactions="transactionsStore.transactions" :filtered-transactions="filteredTransactions"
+          :is-filtered="filters.hasActiveFilters.value" />
+
+        <Button variant="primary" size="lg" @click="handleAddTransaction">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Thêm giao dịch
+        </Button>
+      </div>
     </div>
 
     <div v-if="transactionsStore.realtimeDisconnected"

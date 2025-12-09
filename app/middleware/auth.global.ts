@@ -1,5 +1,6 @@
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const user = useSupabaseUser()
+  const settingsStore = useSettingsStore()
 
   // List of public routes that don't require authentication
   const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/welcome', '/auth/callback', '/debug-auth']
@@ -27,6 +28,14 @@ export default defineNuxtRouteMiddleware((to) => {
   // If user is authenticated and trying to access auth pages (but not welcome), redirect to home
   if (user.value && isPublicRoute && to.path !== '/welcome' && to.path !== '/debug-auth') {
     console.log('[Auth Middleware] User authenticated, redirecting away from auth page')
-    return navigateTo('/')
+    
+    // Load settings if not already loaded
+    if (!settingsStore.settings) {
+      await settingsStore.fetchSettings()
+    }
+    
+    // Redirect to user's preferred default view
+    const defaultPath = settingsStore.settings.defaultView === 'dashboard' ? '/' : '/transactions'
+    return navigateTo(defaultPath)
   }
 })
