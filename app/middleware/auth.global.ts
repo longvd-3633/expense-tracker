@@ -8,11 +8,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Check if the route is public
   const isPublicRoute = publicRoutes.includes(to.path)
 
+  // Don't log user object directly to avoid readonly warnings
   console.log('[Auth Middleware]', {
     path: to.path,
     isPublic: isPublicRoute,
     hasUser: !!user.value,
-    userEmail: user.value?.email
+    userEmail: user.value?.email || 'none'
   })
 
   // If user is not authenticated and trying to access protected route
