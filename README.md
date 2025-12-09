@@ -10,10 +10,71 @@ A modern web application for tracking personal income and expenses built with Nu
 - 📈 **Data Visualization** - Interactive charts for income vs expense trends
 - 🔍 **Advanced Filtering** - Search and filter transactions by multiple criteria
 - 📤 **CSV Export** - Export transaction data to CSV format
+- 📥 **CSV Import** - Import transactions from CSV files with validation
+- 🔁 **Recurring Transactions** - Automatically generate transactions on a schedule
 - ⚙️ **User Settings** - Customize date format, currency, theme, and more
 - 🏷️ **Custom Categories** - Create and manage your own expense/income categories
 - 🔄 **Real-time Sync** - Data syncs across devices automatically
 - 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
+
+## Recurring Transactions
+
+Create recurring transaction templates that automatically generate transactions on schedule. Perfect for:
+- Monthly salary (income)
+- Rent/mortgage payments (expense)
+- Subscriptions (Netflix, Spotify, etc.)
+- Utility bills (electricity, water, internet)
+- Weekly grocery budgets
+
+### Supported Recurrence Patterns
+
+- **Daily**: Every N days (e.g., every 3 days)
+- **Weekly**: Specific days of week (e.g., every Monday and Thursday)
+- **Monthly**: 
+  - By date: Same day each month (e.g., 15th of every month)
+  - By weekday: Relative weekday (e.g., 2nd Monday of every month)
+- **Yearly**: Anniversary dates (e.g., annual insurance payment)
+
+### Edge Case Handling
+
+- **Month-end dates**: Jan 31 → Feb 28 (or 29 in leap years)
+- **Leap years**: Feb 29 recurring → Feb 28 in non-leap years
+- **Missing weekdays**: 5th Monday in months with only 4 Mondays → skips that month
+- **DST transitions**: Automatic timezone adjustment
+
+### Auto-Generation
+
+- Runs automatically when you open the app
+- Generates up to 30 missed occurrences per template
+- Duplicate prevention: won't create the same transaction twice
+- Can skip individual occurrences
+- Can edit or delete templates anytime
+
+### Usage Example
+
+1. Go to **Định kỳ** (Recurring) page
+2. Click **Tạo mẫu mới** (Create new template)
+3. Fill in transaction details:
+   - Name: "Lương hằng tháng" (Monthly salary)
+   - Type: Thu (Income)
+   - Amount: 10,000,000 VND
+   - Category: Lương (Salary)
+4. Set recurrence pattern:
+   - Frequency: Hằng tháng (Monthly)
+   - Every: 1 month
+   - On: Ngày 1 (1st of month)
+   - Start: Today
+   - End: Never
+5. Click **Tạo mẫu** (Create template)
+6. The system will automatically create a transaction on the 1st of every month
+
+### Database Schema
+
+Three new tables power recurring transactions:
+
+- **recurring_transactions**: Template definitions
+- **generated_transactions**: Tracks which transactions were auto-generated
+- **transactions.recurring_transaction_id**: Links generated transactions back to template
 
 ## Tech Stack
 
