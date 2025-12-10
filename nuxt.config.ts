@@ -26,6 +26,10 @@ export default defineNuxtConfig({
       callback: '/auth/callback',
       exclude: ['/login', '/register', '/forgot-password', '/reset-password', '/auth/*'],
     },
+    cookieOptions: {
+      secure: true,
+      sameSite: 'lax',
+    },
   },
 
   components: [
