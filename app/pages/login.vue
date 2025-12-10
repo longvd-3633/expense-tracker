@@ -67,7 +67,8 @@ definePageMeta({
   layout: false,
 })
 
-const { login } = useAuth()
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const route = useRoute()
 
 const form = ref({
@@ -95,14 +96,30 @@ const handleLogin = async () => {
     loading.value = true
 
     console.log('Calling login API...')
-    const result = await login(form.value.email, form.value.password)
-    console.log('Login successful:', result.user?.email)
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email: form.value.email,
+      password: form.value.password,
+    })
 
-    // Wait a moment for session to be established
-    await new Promise(resolve => setTimeout(resolve, 500))
+    if (loginError) {
+      throw loginError
+    }
 
-    // Use window.location for full page reload to ensure auth state is fresh
-    window.location.href = '/'
+    console.log('Login API successful:', data.user?.email)
+
+    // Wait for user state to update
+    let retries = 0
+    while (!user.value && retries < 10) {
+      await new Promise(resolve => setTimeout(resolve, 200))
+      retries++
+      console.log('Waiting for user state...', retries)
+    }
+
+    console.log('User state after login:', user.value?.email)
+
+    // Redirect to home or intended page
+    const redirect = route.query.redirect as string || '/'
+    await navigateTo(redirect)
   } catch (e: any) {
     console.error('Login error:', e)
     console.error('Login error details:', {
@@ -111,7 +128,7 @@ const handleLogin = async () => {
       code: e.code,
       name: e.name
     })
-    
+
     if (e.message?.includes('Invalid login credentials')) {
       error.value = 'Email hoặc mật khẩu không đúng.'
     } else if (e.message?.includes('Email not confirmed')) {
