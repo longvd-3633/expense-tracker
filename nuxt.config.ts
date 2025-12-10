@@ -27,8 +27,9 @@ export default defineNuxtConfig({
       exclude: ['/login', '/register', '/forgot-password', '/reset-password', '/auth/*'],
     },
     cookieOptions: {
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     },
   },
 
