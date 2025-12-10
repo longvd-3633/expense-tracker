@@ -4,6 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Supabase public keys are safe to expose in client-side code
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_KEY,SUPABASE_URL"
 
 [[redirects]]
   from = "/*"
