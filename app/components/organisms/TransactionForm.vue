@@ -174,13 +174,16 @@ onUnmounted(() => {
           <Transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 scale-95"
             enter-to-class="opacity-100 scale-100" leave-active-class="transition ease-in duration-200"
             leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
-            <div v-if="isOpen" class="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6" @click.stop>
+            <div v-if="isOpen" class="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-xl w-full p-6"
+              @click.stop>
               <!-- Header -->
               <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-gray-900">
+                <h2 class="text-xl font-semibold text-slate-900 dark:text-white">
                   {{ initialData?.category ? 'Chỉnh sửa giao dịch' : 'Thêm giao dịch' }}
                 </h2>
-                <button class="text-gray-400 hover:text-gray-600 transition-colors" @click="handleClose">
+                <button
+                  class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
+                  @click="handleClose">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -191,20 +194,22 @@ onUnmounted(() => {
               <!-- Form -->
               <form @submit.prevent="handleSubmit">
                 <div class="space-y-6">
-                  <div class="rounded-xl border border-gray-100 bg-slate-50 p-4 shadow-inner">
+                  <div
+                    class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800 p-4 shadow-inner">
                     <div class="flex items-center justify-between">
                       <div>
-                        <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Loại</p>
-                        <p class="text-lg font-semibold text-gray-900">{{ initialData?.category ? 'Chỉnh sửa' : 'Tạo mới' }}</p>
+                        <p class="text-xs uppercase tracking-[0.3em] text-slate-400 dark:text-zinc-500">Loại</p>
+                        <p class="text-lg font-semibold text-slate-900 dark:text-white">{{ initialData?.category ?
+                          'Chỉnh sửa' : 'Tạo mới' }}</p>
                       </div>
-                      <span class="text-sm text-gray-500">Bắt buộc *</span>
+                      <span class="text-sm text-slate-500 dark:text-zinc-400">Bắt buộc *</span>
                     </div>
                     <div class="mt-4 grid grid-cols-2 gap-3">
                       <button type="button" :class="[
                         'px-4 py-2 rounded-2xl font-medium transition-all duration-200',
                         formData.type === 'income'
                           ? 'bg-green-600 text-white shadow-lg'
-                          : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300',
+                          : 'bg-white dark:bg-zinc-700 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-600 hover:border-slate-300 dark:hover:border-zinc-500',
                       ]" @click="formData.type = 'income'">
                         Thu nhập
                       </button>
@@ -212,7 +217,7 @@ onUnmounted(() => {
                         'px-4 py-2 rounded-2xl font-medium transition-all duration-200',
                         formData.type === 'expense'
                           ? 'bg-red-600 text-white shadow-lg'
-                          : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300',
+                          : 'bg-white dark:bg-zinc-700 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-600 hover:border-slate-300 dark:hover:border-zinc-500',
                       ]" @click="formData.type = 'expense'">
                         Chi tiêu
                       </button>
@@ -236,11 +241,11 @@ onUnmounted(() => {
                   </div>
 
                   <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="description" class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">
                       Ghi chú
                     </label>
                     <textarea id="description" v-model="formData.description" rows="3"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                      class="w-full px-3 py-2 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                       placeholder="Thêm ghi chú cho giao dịch này..."></textarea>
                   </div>
                 </div>

@@ -38,6 +38,10 @@ const props = withDefaults(defineProps<DashboardChartProps>(), {
 const { formatCurrency } = useFormatters()
 const tooltipDateFormatter = new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: 'short' })
 
+// Detect dark mode for chart colors
+const colorMode = useColorMode()
+const isDark = computed(() => colorMode.value === 'dark')
+
 const hasValues = computed(() => {
   return props.income.some(value => value > 0) || props.expense.some(value => value > 0)
 })
@@ -85,6 +89,7 @@ const chartOptions = computed(() => ({
         padding: 18,
         boxWidth: 10,
         font: { size: 12 },
+        color: isDark.value ? '#A1A1AA' : '#475569',
       },
       onClick(event: any, legendItem: any, legend: any) {
         const ci = legend.chart
@@ -95,10 +100,10 @@ const chartOptions = computed(() => ({
       },
     },
     tooltip: {
-      backgroundColor: '#0F172A',
+      backgroundColor: isDark.value ? '#3F3F46' : '#0F172A',
       titleColor: '#F8FAFC',
       bodyColor: '#E2E8F0',
-      borderColor: '#1E293B',
+      borderColor: isDark.value ? '#52525B' : '#1E293B',
       borderWidth: 1,
       padding: 10,
       caretPadding: 6,
@@ -130,11 +135,14 @@ const chartOptions = computed(() => ({
   },
   scales: {
     x: {
-      grid: { color: 'rgba(15,23,42,0.05)', borderColor: '#E2E8F0' },
+      grid: {
+        color: isDark.value ? 'rgba(63, 63, 70, 0.5)' : 'rgba(15,23,42,0.05)',
+        borderColor: isDark.value ? '#52525B' : '#E2E8F0'
+      },
       ticks: {
         maxRotation: 0,
         autoSkip: true,
-        color: '#475569',
+        color: isDark.value ? '#A1A1AA' : '#475569',
         padding: 6,
         font: { size: 12 },
       },
@@ -146,7 +154,7 @@ const chartOptions = computed(() => ({
           const numericValue = typeof value === 'string' ? Number(value) : value
           return formatCurrency(numericValue)
         },
-        color: '#64748B',
+        color: isDark.value ? '#A1A1AA' : '#64748B',
         padding: 8,
       },
       grid: {
@@ -154,6 +162,9 @@ const chartOptions = computed(() => ({
         borderDash: [4, 4],
         color(context: any) {
           const value = context?.tick?.value
+          if (isDark.value) {
+            return value === 0 ? '#71717A' : 'rgba(63, 63, 70, 0.5)'
+          }
           return value === 0 ? '#94A3B8' : '#E2E8F0'
         },
       },
@@ -163,17 +174,18 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm h-full flex flex-col">
+  <section
+    class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm h-full flex flex-col">
     <header class="mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">{{ title }}</p>
-      <p v-if="periodLabel" class="text-sm text-gray-500">{{ periodLabel }}</p>
+      <p v-if="periodLabel" class="text-sm text-slate-500 dark:text-zinc-400">{{ periodLabel }}</p>
     </header>
 
-    <div v-if="loading" class="h-72 w-full animate-pulse rounded-xl bg-slate-50" />
+    <div v-if="loading" class="h-72 w-full animate-pulse rounded-xl bg-slate-50 dark:bg-zinc-800" />
 
     <div v-else class="flex-1 flex flex-col">
       <div v-if="!hasValues"
-        class="rounded-xl border border-dashed border-gray-200 bg-slate-50/60 p-8 text-center text-sm text-gray-500 flex-1 flex items-center justify-center">
+        class="rounded-xl border border-dashed border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/60 p-8 text-center text-sm text-slate-500 dark:text-zinc-400 flex-1 flex items-center justify-center">
         {{ emptyLabel }}
       </div>
 
@@ -182,7 +194,7 @@ const chartOptions = computed(() => ({
           <Line :data="chartData" :options="chartOptions" />
         </div>
         <template #fallback>
-          <div class="h-72 w-full animate-pulse rounded-xl bg-slate-50" />
+          <div class="h-72 w-full animate-pulse rounded-xl bg-slate-50 dark:bg-zinc-800" />
         </template>
       </ClientOnly>
     </div>

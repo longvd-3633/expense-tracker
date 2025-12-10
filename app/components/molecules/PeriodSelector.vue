@@ -32,10 +32,11 @@ const handleSelect = (value: PeriodType) => {
       :aria-selected="props.modelValue === option"
       class="flex-1 min-w-[140px] rounded-2xl border px-4 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       :class="props.modelValue === option
-        ? 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm'
-        : 'border-gray-200 text-gray-600 hover:border-blue-200 hover:text-blue-600'" @click="handleSelect(option)">
+        ? 'border-blue-300 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm'
+        : 'border-slate-200 dark:border-zinc-600 text-slate-600 dark:text-zinc-300 hover:border-blue-300 dark:hover:border-blue-500/50 hover:text-blue-600 dark:hover:text-blue-400'"
+      @click="handleSelect(option)">
       <span class="text-sm font-semibold">{{ labels[option].label }}</span>
-      <p class="text-xs text-gray-500">{{ labels[option].hint }}</p>
+      <p class="text-xs text-slate-500 dark:text-zinc-400">{{ labels[option].hint }}</p>
     </button>
   </div>
 </template>

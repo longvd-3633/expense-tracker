@@ -1,5 +1,24 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+
+// Check default view setting and redirect if needed
+const settingsStore = useSettingsStore()
+const route = useRoute()
+
+// Fetch settings and check for redirect
+await settingsStore.fetchSettings()
+console.log('[Index] Settings loaded:', JSON.stringify(settingsStore.settings))
+console.log('[Index] defaultView:', settingsStore.settings.defaultView)
+
+// Only redirect if default view is transactions AND user is not explicitly navigating to dashboard
+// Check if user came from internal navigation (has referrer or history state)
+const isExplicitNavigation = route.query.explicit === 'true'
+
+if (settingsStore.settings.defaultView === 'transactions' && !isExplicitNavigation) {
+  console.log('[Index] Redirecting to /transactions')
+  await navigateTo('/transactions', { replace: true })
+}
+
 const transactionsStore = useTransactionsStore()
 const categoriesStore = useCategoriesStore()
 const user = useSupabaseUser()
@@ -244,28 +263,29 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
   <div class="space-y-6">
     <header class="mb-2">
       <p class="text-sm font-semibold uppercase tracking-[0.2em] text-blue-500">Tổng quan</p>
-      <h1 class="mt-2 text-3xl font-bold text-gray-900">Dashboard</h1>
-      <p class="text-gray-600">Tình hình tài chính của bạn · {{ periodLabel }}</p>
+      <h1 class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+      <p class="text-slate-600 dark:text-zinc-400">Tình hình tài chính của bạn · {{ periodLabel }}</p>
     </header>
 
-    <section class="rounded-2xl bg-white p-6 shadow-sm">
+    <section
+      class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm dark:shadow-zinc-900/50">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PeriodSelector :model-value="currentPeriod" @update:model-value="setPeriod" />
 
         <DateNavigator :label="periodLabel" :can-go-next="canGoToNext" :disable-today="viewingCurrentPeriod"
           :is-current-period="viewingCurrentPeriod" @previous="goToPrevious" @next="goToNext" @today="goToToday">
           <template #meta>
-            <p class="mt-1 text-xs text-gray-500">{{ rangeLabel }}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-zinc-500">{{ rangeLabel }}</p>
           </template>
         </DateNavigator>
       </div>
-      <p class="mt-4 text-xs text-gray-400">
+      <p class="mt-4 text-xs text-slate-400 dark:text-zinc-500">
         Phím tắt: ← kỳ trước · → kỳ tiếp · T quay về hôm nay
       </p>
     </section>
 
     <div v-if="transactionsStore.realtimeDisconnected"
-      class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
       <div class="flex items-center gap-3">
         <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-600">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -291,23 +311,26 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
     </div>
 
     <section v-if="isLoading" class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div v-for="i in 3" :key="i" class="rounded-2xl bg-white p-6 shadow-sm">
-        <div class="h-4 w-1/2 rounded bg-gray-100" />
-        <div class="mt-4 h-8 w-3/4 rounded bg-gray-100" />
-        <div class="mt-6 h-3 w-2/3 rounded bg-gray-50" />
+      <div v-for="i in 3" :key="i"
+        class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm dark:shadow-zinc-900/50">
+        <div class="h-4 w-1/2 rounded bg-slate-100 dark:bg-zinc-800" />
+        <div class="mt-4 h-8 w-3/4 rounded bg-slate-100 dark:bg-zinc-800" />
+        <div class="mt-6 h-3 w-2/3 rounded bg-slate-50 dark:bg-zinc-800/50" />
       </div>
     </section>
 
     <section v-else>
       <div v-if="stats.count === 0"
-        class="rounded-3xl border border-dashed border-gray-200 bg-gradient-to-br from-white via-blue-50 to-white p-10 text-center">
-        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+        class="rounded-3xl border border-dashed border-slate-200 dark:border-zinc-700 bg-gradient-to-br from-white via-blue-50 to-white dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-10 text-center">
+        <div
+          class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
           <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-gray-900">Chưa có dữ liệu trong giai đoạn này</h3>
-        <p class="mt-2 text-gray-500">Thêm giao dịch đầu tiên để dashboard bắt đầu hiển thị thống kê realtime.</p>
+        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Chưa có dữ liệu trong giai đoạn này</h3>
+        <p class="mt-2 text-slate-500 dark:text-zinc-400">Thêm giao dịch đầu tiên để dashboard bắt đầu hiển thị thống kê
+          realtime.</p>
         <NuxtLink to="/transactions"
           class="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700">
           Ghi nhận giao dịch
@@ -323,10 +346,10 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
         <StatCard v-for="card in statCards" :key="card.key" :label="card.label" :amount="card.amount"
           :variant="card.variant" :chip-label="card.chipLabel" :description="card.description">
           <template v-if="card.key === 'income'" #meta>
-            <span class="text-xs text-gray-400">{{ incomeShare }}% tổng thu + chi</span>
+            <span class="text-xs text-slate-400 dark:text-zinc-500">{{ incomeShare }}% tổng thu + chi</span>
           </template>
           <template v-else-if="card.key === 'expense'" #meta>
-            <span class="text-xs text-gray-400">{{ expenseShare }}% tổng thu + chi</span>
+            <span class="text-xs text-slate-400 dark:text-zinc-500">{{ expenseShare }}% tổng thu + chi</span>
           </template>
         </StatCard>
       </div>
@@ -338,15 +361,16 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
       <CategoryChart :slices="categoryChartSlices" :loading="isLoading" @slice-click="handleCategoryClick" />
     </section>
 
-    <section class="rounded-2xl bg-white p-6 shadow-sm">
+    <section
+      class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm dark:shadow-zinc-900/50">
       <div class="flex flex-col gap-4">
-        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-zinc-400">
           <span>
             {{ stats.count }} giao dịch trong
-            <span class="font-semibold text-gray-900">{{ rangeLabel }}</span>
+            <span class="font-semibold text-slate-900 dark:text-white">{{ rangeLabel }}</span>
           </span>
           <span
-            class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+            class="inline-flex items-center gap-2 rounded-full bg-blue-50 dark:bg-blue-900/40 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
             <span class="h-2 w-2 rounded-full bg-blue-500" /> Thu {{ incomeShare }}%
             <span class="h-2 w-2 rounded-full bg-rose-500" /> Chi {{ expenseShare }}%
           </span>
@@ -354,30 +378,32 @@ const handleCategoryClick = (categoryId: string | null | undefined, isOthers: bo
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <NuxtLink to="/transactions"
-            class="group flex items-center rounded-2xl border border-gray-200 p-4 transition hover:border-blue-400 hover:bg-blue-50">
-            <span class="mr-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+            class="group flex items-center rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 transition hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30">
+            <span
+              class="mr-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
               <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
               </svg>
             </span>
             <div>
-              <h3 class="font-semibold text-gray-900">Thêm giao dịch mới</h3>
-              <p class="text-sm text-gray-500">Cập nhật thu chi để dashboard luôn chính xác</p>
+              <h3 class="font-semibold text-slate-900 dark:text-white">Thêm giao dịch mới</h3>
+              <p class="text-sm text-slate-500 dark:text-zinc-400">Cập nhật thu chi để dashboard luôn chính xác</p>
             </div>
           </NuxtLink>
 
           <NuxtLink to="/transactions"
-            class="group flex items-center rounded-2xl border border-gray-200 p-4 transition hover:border-emerald-400 hover:bg-emerald-50">
+            class="group flex items-center rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 transition hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
             <span
-              class="mr-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              class="mr-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
               <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
               </svg>
             </span>
             <div>
-              <h3 class="font-semibold text-gray-900">Xem danh sách chi tiết</h3>
-              <p class="text-sm text-gray-500">Quản lý {{ stats.count }} giao dịch trong kỳ đã chọn</p>
+              <h3 class="font-semibold text-slate-900 dark:text-white">Xem danh sách chi tiết</h3>
+              <p class="text-sm text-slate-500 dark:text-zinc-400">Quản lý {{ stats.count }} giao dịch trong kỳ đã chọn
+              </p>
             </div>
           </NuxtLink>
         </div>

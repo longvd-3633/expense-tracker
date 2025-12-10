@@ -383,14 +383,15 @@ const toggleWeekday = (day: number) => {
 <template>
   <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
     @click.self="handleClose">
-    <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white dark:bg-zinc-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
-      <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+      <div class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-700 px-6 py-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-900">
+          <h2 class="text-xl font-semibold text-slate-900 dark:text-white">
             {{ mode === 'edit' ? 'Chỉnh sửa giao dịch định kỳ' : 'Tạo giao dịch định kỳ' }}
           </h2>
-          <button @click="handleClose" class="text-gray-400 hover:text-gray-600">
+          <button @click="handleClose"
+            class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -402,7 +403,7 @@ const toggleWeekday = (day: number) => {
       <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
         <!-- Template Name -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
             Tên mẫu *
           </label>
           <Input v-model="formData.name" placeholder="VD: Lương hằng tháng, Tiền thuê nhà" :error="errors.name" />
@@ -411,7 +412,7 @@ const toggleWeekday = (day: number) => {
         <!-- Type & Amount -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Loại *
             </label>
             <Select v-model="formData.type" :options="[
@@ -421,7 +422,7 @@ const toggleWeekday = (day: number) => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Số tiền *
             </label>
             <Input v-model.number="formData.amount" type="number" placeholder="0" :error="errors.amount" />
@@ -430,7 +431,7 @@ const toggleWeekday = (day: number) => {
 
         <!-- Category -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
             Danh mục *
           </label>
           <Select v-model="formData.categoryId" :options="categoryOptions" placeholder="Chọn danh mục"
@@ -439,23 +440,23 @@ const toggleWeekday = (day: number) => {
 
         <!-- Description -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
             Mô tả
           </label>
           <Input v-model="formData.description" placeholder="Ghi chú thêm" />
         </div>
 
         <!-- Divider -->
-        <div class="border-t border-gray-200"></div>
+        <div class="border-t border-slate-200 dark:border-zinc-700"></div>
 
         <!-- Recurrence Pattern -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900">Lịch lặp lại</h3>
+          <h3 class="text-lg font-medium text-slate-900 dark:text-white">Lịch lặp lại</h3>
 
           <!-- Frequency & Interval -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                 Tần suất *
               </label>
               <Select v-model="formData.frequency" :options="[
@@ -467,7 +468,7 @@ const toggleWeekday = (day: number) => {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                 Mỗi
               </label>
               <Input v-model="formData.interval" type="number" :min="1"
@@ -478,7 +479,7 @@ const toggleWeekday = (day: number) => {
 
           <!-- Weekly: Weekday Selection -->
           <div v-if="formData.frequency === 'weekly'">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Chọn ngày trong tuần *
             </label>
             <div class="flex flex-wrap gap-2">
@@ -487,35 +488,35 @@ const toggleWeekday = (day: number) => {
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   formData.weekdays?.includes(day.value)
                     ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
                 ]">
                 {{ day.label }}
               </button>
             </div>
-            <p v-if="errors.weekdays" class="mt-1 text-sm text-red-600">
+            <p v-if="errors.weekdays" class="mt-1 text-sm text-red-600 dark:text-red-400">
               {{ errors.weekdays }}
             </p>
           </div>
 
           <!-- Monthly: Type Selection -->
           <div v-if="formData.frequency === 'monthly'">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Loại lặp lại hằng tháng *
             </label>
             <div class="space-y-2">
               <label class="flex items-center">
                 <input type="radio" v-model="formData.monthlyType" value="by_date" class="mr-2" />
-                <span class="text-sm text-gray-700">Theo ngày trong tháng</span>
+                <span class="text-sm text-slate-700 dark:text-zinc-300">Theo ngày trong tháng</span>
               </label>
               <label class="flex items-center">
                 <input type="radio" v-model="formData.monthlyType" value="by_weekday" class="mr-2" />
-                <span class="text-sm text-gray-700">Theo ngày trong tuần</span>
+                <span class="text-sm text-slate-700 dark:text-zinc-300">Theo ngày trong tuần</span>
               </label>
             </div>
 
             <!-- By Date -->
             <div v-if="formData.monthlyType === 'by_date'" class="mt-3">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                 Ngày trong tháng (1-31)
               </label>
               <Input v-model="monthlyDayModel" type="number" :min="1" :max="31" placeholder="15"
@@ -525,14 +526,14 @@ const toggleWeekday = (day: number) => {
             <!-- By Weekday -->
             <div v-if="formData.monthlyType === 'by_weekday'" class="mt-3 space-y-3">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Vị trí
                 </label>
                 <Select v-model="monthlyWeekPositionModel" :options="weekPositionOptions" placeholder="Chọn vị trí"
                   :error="errors.monthlyWeekPosition" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Ngày trong tuần
                 </label>
                 <Select v-model="monthlyWeekdayModel" :options="weekdayOptions" placeholder="Chọn ngày"
@@ -543,7 +544,7 @@ const toggleWeekday = (day: number) => {
 
           <!-- Start Date -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Ngày bắt đầu *
             </label>
             <DatePicker v-model="formData.startDate" />
@@ -551,18 +552,18 @@ const toggleWeekday = (day: number) => {
 
           <!-- End Condition -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Kết thúc
             </label>
             <div class="space-y-3">
               <label class="flex items-center">
                 <input type="radio" v-model="endCondition" value="never" class="mr-2" />
-                <span class="text-sm text-gray-700">Không bao giờ</span>
+                <span class="text-sm text-slate-700 dark:text-zinc-300">Không bao giờ</span>
               </label>
 
               <label class="flex items-center">
                 <input type="radio" v-model="endCondition" value="on_date" class="mr-2" />
-                <span class="text-sm text-gray-700">Vào ngày</span>
+                <span class="text-sm text-slate-700 dark:text-zinc-300">Vào ngày</span>
               </label>
               <div v-if="endCondition === 'on_date'" class="ml-6">
                 <DatePicker v-model="endDateModel" :error="errors.endDate" />
@@ -570,7 +571,7 @@ const toggleWeekday = (day: number) => {
 
               <label class="flex items-center">
                 <input type="radio" v-model="endCondition" value="after_count" class="mr-2" />
-                <span class="text-sm text-gray-700">Sau</span>
+                <span class="text-sm text-slate-700 dark:text-zinc-300">Sau</span>
               </label>
               <div v-if="endCondition === 'after_count'" class="ml-6">
                 <Input v-model="maxOccurrencesModel" type="number" :min="1" placeholder="12" suffix="lần"
@@ -581,20 +582,21 @@ const toggleWeekday = (day: number) => {
         </div>
 
         <!-- Preview -->
-        <div class="bg-blue-50 rounded-lg p-4">
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <div class="flex items-start gap-2 mb-3">
-            <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div class="flex-1">
-              <p class="text-sm font-medium text-blue-900">
+              <p class="text-sm font-medium text-blue-900 dark:text-blue-300">
                 {{ patternDescription }}
               </p>
-              <p class="text-xs text-blue-700 mt-1">
+              <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
                 5 lần tiếp theo:
               </p>
-              <ul class="text-xs text-blue-600 mt-1 space-y-0.5">
+              <ul class="text-xs text-blue-600 dark:text-blue-400 mt-1 space-y-0.5">
                 <li v-for="(date, index) in nextOccurrences" :key="index">
                   {{ formatDate(date, 'dd/MM/yyyy (EEEE)', { locale: vi }) }}
                 </li>
@@ -607,11 +609,11 @@ const toggleWeekday = (day: number) => {
         <div>
           <label class="flex items-center">
             <input type="checkbox" v-model="formData.autoCreate" class="mr-2 rounded" />
-            <span class="text-sm text-gray-700">
+            <span class="text-sm text-slate-700 dark:text-zinc-300">
               Tự động tạo giao dịch (khuyến nghị)
             </span>
           </label>
-          <p class="text-xs text-gray-500 mt-1 ml-6">
+          <p class="text-xs text-slate-500 dark:text-zinc-500 mt-1 ml-6">
             Nếu tắt, bạn cần tạo giao dịch thủ công từ mẫu này
           </p>
         </div>

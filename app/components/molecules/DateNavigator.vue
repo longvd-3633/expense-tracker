@@ -52,7 +52,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex flex-wrap items-center gap-3" aria-live="polite">
     <button type="button"
-      class="rounded-2xl border border-gray-200 p-3 text-gray-700 transition hover:border-blue-200 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      class="rounded-2xl border border-slate-200 dark:border-zinc-600 p-3 text-slate-700 dark:text-zinc-300 transition hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       @click="emit('previous')">
       <span class="sr-only">Kỳ trước</span>
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -63,10 +63,10 @@ onBeforeUnmount(() => {
     </button>
 
     <div class="min-w-[160px] text-center">
-      <p class="text-xs uppercase tracking-wide text-gray-400">Chu kỳ đang xem</p>
-      <p class="text-base font-semibold text-gray-900">{{ label }}</p>
+      <p class="text-xs uppercase tracking-wide text-slate-400 dark:text-zinc-500">Chu kỳ đang xem</p>
+      <p class="text-base font-semibold text-slate-900 dark:text-white">{{ label }}</p>
       <span v-if="props.isCurrentPeriod"
-        class="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+        class="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/40 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
         Hiện tại
       </span>
@@ -76,8 +76,9 @@ onBeforeUnmount(() => {
     <button type="button"
       class="rounded-2xl border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       :class="props.canGoNext
-        ? 'border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-600'
-        : 'border-gray-100 text-gray-300 cursor-not-allowed'" :disabled="!props.canGoNext" @click="emit('next')">
+        ? 'border-slate-200 dark:border-zinc-600 text-slate-700 dark:text-zinc-300 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'
+        : 'border-slate-100 dark:border-zinc-700 text-slate-300 dark:text-zinc-600 cursor-not-allowed'"
+      :disabled="!props.canGoNext" @click="emit('next')">
       <span class="sr-only">Kỳ tiếp theo</span>
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd"
@@ -89,9 +90,9 @@ onBeforeUnmount(() => {
     <button type="button"
       class="rounded-2xl border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       :class="props.disableToday
-        ? 'border-gray-100 text-gray-300 cursor-not-allowed'
-        : 'border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-600'" :disabled="props.disableToday"
-      @click="emit('today')">
+        ? 'border-slate-100 dark:border-zinc-700 text-slate-300 dark:text-zinc-600 cursor-not-allowed'
+        : 'border-slate-200 dark:border-zinc-600 text-slate-700 dark:text-zinc-300 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'"
+      :disabled="props.disableToday" @click="emit('today')">
       Hôm nay · phím T
     </button>
   </div>

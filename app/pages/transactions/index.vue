@@ -415,8 +415,8 @@ const handleUndoDelete = async () => {
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Giao dịch</h1>
-        <p class="text-gray-600">Quản lý thu chi của bạn</p>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Giao dịch</h1>
+        <p class="text-slate-600 dark:text-zinc-400">Quản lý thu chi của bạn</p>
       </div>
 
       <div class="flex items-center gap-3">
@@ -436,7 +436,7 @@ const handleUndoDelete = async () => {
     </div>
 
     <div v-if="transactionsStore.realtimeDisconnected"
-      class="mb-6 flex flex-col gap-3 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-yellow-900 sm:flex-row sm:items-center sm:justify-between">
+      class="mb-6 flex flex-col gap-3 rounded-xl border border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-950/50 p-4 text-yellow-900 dark:text-yellow-200 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-start gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
@@ -479,13 +479,15 @@ const handleUndoDelete = async () => {
         leave-to-class="opacity-0">
         <div v-if="deleteTarget" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
           <div class="absolute inset-0 bg-black bg-opacity-50" @click="resetDeleteState" />
-          <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="relative bg-white dark:bg-zinc-900 rounded-xl shadow-2xl max-w-md w-full p-6">
             <div class="flex items-start justify-between mb-4">
               <div>
-                <h3 class="text-xl font-semibold text-gray-900">Xóa giao dịch?</h3>
-                <p class="text-sm text-gray-500">Bạn không thể hoàn tác sau khi hết thời gian cho phép.</p>
+                <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Xóa giao dịch?</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400">Bạn không thể hoàn tác sau khi hết thời gian cho
+                  phép.</p>
               </div>
-              <button class="text-gray-400 hover:text-gray-600" @click="resetDeleteState">
+              <button class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300"
+                @click="resetDeleteState">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -493,9 +495,9 @@ const handleUndoDelete = async () => {
               </button>
             </div>
 
-            <div class="space-y-3 mb-6 rounded-lg bg-gray-50 p-4">
+            <div class="space-y-3 mb-6 rounded-lg bg-slate-50 dark:bg-zinc-800 p-4">
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Số tiền</span>
+                <span class="text-sm text-slate-600 dark:text-zinc-400">Số tiền</span>
                 <span :class="[
                   'text-lg font-semibold',
                   deleteTarget.type === 'income' ? 'text-green-600' : 'text-red-600',
@@ -503,17 +505,17 @@ const handleUndoDelete = async () => {
                   {{ deleteTarget.type === 'income' ? '+' : '-' }}{{ formatCurrency(deleteTarget.amount) }}
                 </span>
               </div>
-              <div class="flex items-center justify-between text-sm text-gray-600">
+              <div class="flex items-center justify-between text-sm text-slate-600 dark:text-zinc-400">
                 <span>Danh mục</span>
                 <span>{{ deletingCategory?.name || 'Không xác định' }}</span>
               </div>
-              <div class="flex items-center justify-between text-sm text-gray-600">
+              <div class="flex items-center justify-between text-sm text-slate-600 dark:text-zinc-400">
                 <span>Ngày</span>
                 <span>{{ formatDate(deleteTarget.date) }}</span>
               </div>
             </div>
 
-            <p v-if="deleteTarget.description" class="text-sm text-gray-500 mb-6">
+            <p v-if="deleteTarget.description" class="text-sm text-slate-500 dark:text-zinc-400 mb-6">
               "{{ deleteTarget.description }}"
             </p>
 
@@ -571,20 +573,21 @@ const handleUndoDelete = async () => {
         leave-to-class="opacity-0">
         <div v-if="conflictState" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
           <div class="absolute inset-0 bg-black bg-opacity-40" />
-          <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl space-y-5">
+          <div class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 p-6 shadow-2xl space-y-5">
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="text-sm uppercase tracking-wide text-blue-500">Xung đột</p>
-                <h3 class="text-xl font-semibold text-gray-900">
+                <h3 class="text-xl font-semibold text-slate-900 dark:text-white">
                   {{ conflictState.type === 'deleted' ? 'Giao dịch đã bị xóa' : 'Giao dịch có phiên bản mới' }}
                 </h3>
-                <p class="text-sm text-gray-600">
+                <p class="text-sm text-slate-600 dark:text-zinc-400">
                   {{ conflictState.type === 'deleted'
                     ? 'Giao dịch bạn đang chỉnh sửa không còn tồn tại trên Supabase.'
                     : 'Giao dịch bạn đang chỉnh sửa đã được cập nhật bởi thiết bị khác.' }}
                 </p>
               </div>
-              <button class="text-gray-400 hover:text-gray-600" @click="dismissConflict">
+              <button class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300"
+                @click="dismissConflict">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -593,11 +596,11 @@ const handleUndoDelete = async () => {
             </div>
 
             <div v-if="conflictState.type === 'updated' && conflictState.server"
-              class="rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
-              <p class="font-semibold text-gray-900">
+              class="rounded-lg bg-slate-50 dark:bg-zinc-800 p-3 text-sm text-slate-600 dark:text-zinc-400">
+              <p class="font-semibold text-slate-900 dark:text-white">
                 Phiên bản mới nhất cập nhật vào {{ formatDate(conflictState.server.updatedAt) }}
               </p>
-              <p class="text-xs text-gray-500">Tự động đồng bộ từ Supabase.</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-500">Tự động đồng bộ từ Supabase.</p>
             </div>
 
             <div class="space-y-3" v-if="conflictState.type === 'updated'">
@@ -613,22 +616,27 @@ const handleUndoDelete = async () => {
                 </button>
               </div>
 
-              <div v-if="conflictDetailsVisible" class="space-y-3 rounded-xl border border-gray-100 bg-white p-4">
-                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">So sánh phiên bản</p>
-                <div v-if="conflictDiffs.length === 0" class="text-sm text-gray-500">
+              <div v-if="conflictDetailsVisible"
+                class="space-y-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-500">So sánh phiên
+                  bản</p>
+                <div v-if="conflictDiffs.length === 0" class="text-sm text-slate-500 dark:text-zinc-400">
                   Thay đổi không thể so sánh chi tiết.
                 </div>
                 <div v-else class="space-y-3">
-                  <div v-for="diff in conflictDiffs" :key="diff.field" class="space-y-1 rounded-lg bg-gray-50 p-3">
-                    <p class="text-sm font-semibold text-gray-700">{{ diff.label }}</p>
-                    <div class="grid grid-cols-2 gap-3 text-sm text-gray-600">
+                  <div v-for="diff in conflictDiffs" :key="diff.field"
+                    class="space-y-1 rounded-lg bg-slate-50 dark:bg-zinc-800 p-3">
+                    <p class="text-sm font-semibold text-slate-700 dark:text-zinc-300">{{ diff.label }}</p>
+                    <div class="grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-zinc-400">
                       <div>
-                        <p class="text-[11px] uppercase tracking-wide text-gray-500">Thiết bị khác</p>
-                        <p class="text-sm text-gray-900">{{ diff.server }}</p>
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-zinc-500">Thiết bị khác
+                        </p>
+                        <p class="text-sm text-slate-900 dark:text-white">{{ diff.server }}</p>
                       </div>
                       <div>
-                        <p class="text-[11px] uppercase tracking-wide text-gray-500">Thay đổi của tôi</p>
-                        <p class="text-sm text-gray-900">{{ diff.yours }}</p>
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-zinc-500">Thay đổi của
+                          tôi</p>
+                        <p class="text-sm text-slate-900 dark:text-white">{{ diff.yours }}</p>
                       </div>
                     </div>
                   </div>
@@ -637,7 +645,7 @@ const handleUndoDelete = async () => {
             </div>
 
             <div v-else class="space-y-3">
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-slate-600 dark:text-zinc-400">
                 Vui lòng tải lại danh sách để lấy dữ liệu mới nhất và tiếp tục thao tác.
               </p>
               <div class="flex flex-wrap gap-3">

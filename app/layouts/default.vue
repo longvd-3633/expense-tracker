@@ -2,6 +2,7 @@
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const router = useRouter()
+const route = useRoute()
 
 const isMenuOpen = ref(false)
 
@@ -13,90 +14,79 @@ const handleLogout = async () => {
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
+
+// Close menu when route changes
+watch(
+  () => route.path,
+  () => {
+    isMenuOpen.value = false
+  }
+)
+
+// Helper to check if route is active
+const isActiveRoute = (item: { to: string; exact?: boolean; matchPath?: string }) => {
+  const pathToMatch = item.matchPath || item.to
+  return pathToMatch === route.path || (!item.exact && route.path.startsWith(pathToMatch) && pathToMatch !== '/')
+}
+
+const navItems = [
+  { to: '/?explicit=true', label: 'Dashboard', exact: true, matchPath: '/' },
+  { to: '/transactions', label: 'Giao dịch' },
+  { to: '/categories', label: 'Danh mục' },
+  { to: '/recurring', label: 'Định kỳ' },
+  { to: '/settings', label: 'Cài đặt' },
+]
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-slate-50 dark:bg-zinc-950">
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-40">
-      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <!-- Logo and Desktop Nav -->
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <NuxtLink to="/" class="text-xl font-bold text-blue-600">
-                💰 Expense Tracker
-              </NuxtLink>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <NuxtLink to="/"
-                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
-                active-class="border-blue-500 text-gray-900" exact-active-class="border-blue-500 text-gray-900"
-                inactive-class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    <header
+      class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/80">
+      <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <!-- Logo -->
+          <div class="flex items-center gap-8">
+            <NuxtLink to="/" class="flex items-center gap-2.5">
+              <div
+                class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/20">
+                <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Dashboard
-              </NuxtLink>
-              <NuxtLink to="/transactions"
-                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
-                active-class="border-blue-500 text-gray-900"
-                inactive-class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Giao dịch
-              </NuxtLink>
-              <NuxtLink to="/categories"
-                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
-                active-class="border-blue-500 text-gray-900"
-                inactive-class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-                Danh mục
-              </NuxtLink>
-              <NuxtLink to="/recurring"
-                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
-                active-class="border-blue-500 text-gray-900"
-                inactive-class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Định kỳ
-              </NuxtLink>
-              <NuxtLink to="/settings"
-                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
-                active-class="border-blue-500 text-gray-900"
-                inactive-class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Cài đặt
+              </div>
+              <span class="text-lg font-bold text-slate-900 dark:text-white">Expense Tracker</span>
+            </NuxtLink>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden items-center gap-1 md:flex">
+              <NuxtLink v-for="item in navItems" :key="item.to" :to="item.to"
+                class="group relative rounded-lg px-3 py-2 text-sm font-medium transition-all" :class="isActiveRoute(item)
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800'
+                  ">
+                {{ item.label }}
+                <span v-if="isActiveRoute(item)"
+                  class="absolute inset-x-3 -bottom-[17px] h-0.5 rounded-full bg-blue-600 dark:bg-blue-400" />
               </NuxtLink>
             </div>
           </div>
 
-          <!-- User Menu and Mobile Menu Button -->
-          <div class="flex items-center">
-            <!-- User Info (Desktop) -->
-            <div class="hidden sm:flex items-center space-x-3">
-              <span class="text-sm text-gray-700">
-                {{ user?.email }}
-              </span>
-              <button class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
+          <!-- Right Section -->
+          <div class="flex items-center gap-3">
+            <!-- User Menu (Desktop) -->
+            <div class="hidden items-center gap-3 md:flex">
+              <div class="flex items-center gap-2 rounded-full bg-slate-100 py-1.5 pl-1.5 pr-4 dark:bg-zinc-800">
+                <div
+                  class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-xs font-semibold text-white">
+                  {{ user?.email?.charAt(0).toUpperCase() }}
+                </div>
+                <span class="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                  {{ user?.email?.split('@')[0] }}
+                </span>
+              </div>
+              <button
+                class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-950 dark:hover:text-red-400"
                 @click="handleLogout">
                 Đăng xuất
               </button>
@@ -104,71 +94,50 @@ const toggleMenu = () => {
 
             <!-- Mobile Menu Button -->
             <button
-              class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              class="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition-all hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 md:hidden"
               @click="toggleMenu">
-              <svg v-if="!isMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              <svg v-if="!isMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
         <!-- Mobile Menu -->
-        <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1"
+        <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
           enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
-          leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
-          <div v-if="isMenuOpen" class="sm:hidden pb-3 pt-2">
+          leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+          <div v-if="isMenuOpen" class="border-t border-slate-200 py-4 dark:border-zinc-800 md:hidden">
             <div class="space-y-1">
-              <NuxtLink to="/" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                active-class="border-blue-500 bg-blue-50 text-blue-700"
-                exact-active-class="border-blue-500 bg-blue-50 text-blue-700"
-                inactive-class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                @click="toggleMenu">
-                Dashboard
-              </NuxtLink>
-              <NuxtLink to="/transactions" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                active-class="border-blue-500 bg-blue-50 text-blue-700"
-                inactive-class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                @click="toggleMenu">
-                Giao dịch
-              </NuxtLink>
-              <NuxtLink to="/categories" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                active-class="border-blue-500 bg-blue-50 text-blue-700"
-                inactive-class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                @click="toggleMenu">
-                Danh mục
-              </NuxtLink>
-              <NuxtLink to="/recurring" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                active-class="border-blue-500 bg-blue-50 text-blue-700"
-                inactive-class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                @click="toggleMenu">
-                Định kỳ
-              </NuxtLink>
-              <NuxtLink to="/settings" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                active-class="border-blue-500 bg-blue-50 text-blue-700"
-                inactive-class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-                @click="toggleMenu">
-                Cài đặt
+              <NuxtLink v-for="item in navItems" :key="item.to" :to="item.to"
+                class="block rounded-lg px-3 py-2.5 text-base font-medium transition-all" :class="isActiveRoute(item)
+                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white'
+                  ">
+                {{ item.label }}
               </NuxtLink>
             </div>
-            <div class="pt-4 pb-3 border-t border-gray-200">
-              <div class="px-4">
-                <div class="text-base font-medium text-gray-800">
-                  {{ user?.email }}
+
+            <div class="mt-4 border-t border-slate-200 pt-4 dark:border-zinc-800">
+              <div class="mb-3 flex items-center gap-3 px-3">
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-sm font-semibold text-white">
+                  {{ user?.email?.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-slate-900 dark:text-white">{{ user?.email?.split('@')[0] }}</p>
+                  <p class="text-xs text-slate-500 dark:text-zinc-500">{{ user?.email }}</p>
                 </div>
               </div>
-              <div class="mt-3 px-2">
-                <button
-                  class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-red-600"
-                  @click="handleLogout">
-                  Đăng xuất
-                </button>
-              </div>
+              <button
+                class="w-full rounded-lg px-3 py-2.5 text-left text-base font-medium text-red-600 transition-all hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                @click="handleLogout">
+                Đăng xuất
+              </button>
             </div>
           </div>
         </Transition>
@@ -176,7 +145,7 @@ const toggleMenu = () => {
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <slot />
     </main>
   </div>

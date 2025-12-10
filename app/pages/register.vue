@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
       <!-- Header -->
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-slate-900 dark:text-white">
           Tạo tài khoản
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-2 text-center text-sm text-slate-600 dark:text-zinc-400">
           Hoặc
           <NuxtLink to="/login" class="font-medium text-primary hover:text-primary/80">
             đăng nhập với tài khoản có sẵn
@@ -15,8 +15,8 @@
       </div>
 
       <!-- Success Message -->
-      <div v-if="success" class="rounded-md bg-green-50 p-4">
-        <p class="text-sm text-green-800">
+      <div v-if="success" class="rounded-md bg-green-50 dark:bg-green-950/50 p-4">
+        <p class="text-sm text-green-800 dark:text-green-200">
           Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.
         </p>
       </div>
@@ -27,43 +27,44 @@
         <div class="rounded-md shadow-sm space-y-4">
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <label for="email" class="block text-sm font-medium text-slate-700 dark:text-zinc-300">Email</label>
             <input id="email" v-model="form.email" name="email" type="email" autocomplete="email" required
-              class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              class="mt-1 appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-md shadow-sm placeholder-slate-400 dark:placeholder-zinc-500 text-slate-900 dark:text-white focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="email@example.com" />
           </div>
 
           <!-- Password -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+            <label for="password" class="block text-sm font-medium text-slate-700 dark:text-zinc-300">Mật khẩu</label>
             <input id="password" v-model="form.password" name="password" type="password" autocomplete="new-password"
               required minlength="8"
-              class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              class="mt-1 appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-md shadow-sm placeholder-slate-400 dark:placeholder-zinc-500 text-slate-900 dark:text-white focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="Ít nhất 8 ký tự" />
-            <p class="mt-1 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-slate-500 dark:text-zinc-400">
               Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
             </p>
           </div>
 
           <!-- Confirm Password -->
           <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
+            <label for="confirmPassword" class="block text-sm font-medium text-slate-700 dark:text-zinc-300">Xác nhận
+              mật khẩu</label>
             <input id="confirmPassword" v-model="form.confirmPassword" name="confirmPassword" type="password"
               autocomplete="new-password" required
-              class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              class="mt-1 appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-md shadow-sm placeholder-slate-400 dark:placeholder-zinc-500 text-slate-900 dark:text-white focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="Nhập lại mật khẩu" />
           </div>
         </div>
 
         <!-- Error Message -->
-        <div v-if="error" class="rounded-md bg-red-50 p-4">
-          <p class="text-sm text-red-800">{{ error }}</p>
+        <div v-if="error" class="rounded-md bg-red-50 dark:bg-red-950/50 p-4">
+          <p class="text-sm text-red-800 dark:text-red-200">{{ error }}</p>
         </div>
 
         <!-- Submit Button -->
         <div>
           <button type="submit" :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
             {{ loading ? 'Đang tạo tài khoản...' : 'Đăng ký' }}
           </button>
         </div>

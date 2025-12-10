@@ -62,7 +62,7 @@ const categoryIconComponent = computed(() => {
 })
 
 const amountColor = computed(() => {
-  return props.transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+  return props.transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
 })
 
 const amountPrefix = computed(() => {
@@ -71,7 +71,8 @@ const amountPrefix = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm transition hover:shadow-lg">
+  <div
+    class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 shadow-sm transition hover:shadow-lg dark:hover:shadow-zinc-900/50">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <!-- Left: Category icon and info -->
       <div class="flex items-start space-x-3 flex-1">
@@ -86,24 +87,24 @@ const amountPrefix = computed(() => {
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center space-x-2">
-            <h3 class="text-sm font-medium text-gray-900">
+            <h3 class="text-sm font-medium text-slate-900 dark:text-white">
               {{ category?.name || 'Không xác định' }}
             </h3>
             <span :class="[
               'px-2 py-0.5 text-xs font-medium rounded',
               transaction.type === 'income'
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700',
+                ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
+                : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400',
             ]">
               {{ transaction.type === 'income' ? 'Thu' : 'Chi' }}
             </span>
           </div>
 
-          <p v-if="transaction.description" class="mt-1 text-sm text-gray-600 line-clamp-2">
+          <p v-if="transaction.description" class="mt-1 text-sm text-slate-600 dark:text-zinc-400 line-clamp-2">
             {{ transaction.description }}
           </p>
 
-          <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+          <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-zinc-500">
             <span>{{ formatDate(transaction.date) }}</span>
             <span v-if="transaction.tags && transaction.tags.length > 0" class="flex items-center space-x-1">
               <span>•</span>
@@ -120,8 +121,9 @@ const amountPrefix = computed(() => {
         </span>
 
         <div class="flex items-center space-x-1">
-          <button class="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors" title="Chỉnh sửa"
-            @click="emit('edit', transaction)">
+          <button
+            class="p-1.5 text-slate-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded transition-colors"
+            title="Chỉnh sửa" @click="emit('edit', transaction)">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -129,8 +131,9 @@ const amountPrefix = computed(() => {
             </svg>
           </button>
 
-          <button class="p-1.5 text-gray-400 hover:text-red-600 rounded transition-colors" title="Xóa"
-            @click="emit('delete', transaction)">
+          <button
+            class="p-1.5 text-slate-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 rounded transition-colors"
+            title="Xóa" @click="emit('delete', transaction)">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

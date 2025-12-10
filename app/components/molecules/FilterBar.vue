@@ -1,24 +1,29 @@
 <template>
-  <section class="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm backdrop-blur">
-    <div class="flex flex-wrap items-start gap-4">
+  <section
+    class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 p-4 shadow-sm backdrop-blur">
+    <div class="flex flex-wrap items-start gap-6">
       <div class="flex flex-col gap-2">
-        <span class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Loại</span>
+        <span class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-zinc-500">Loại</span>
         <div class="flex gap-2">
-          <button v-for="option in typeOptions" :key="option.value" type="button"
-            :class="['rounded-full px-4 py-1.5 text-xs font-semibold transition', option.value === typeFilter ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 bg-white text-slate-500 hover:border-slate-400 hover:text-slate-600']"
-            class="border" @click="selectType(option.value)">
+          <button v-for="option in typeOptions" :key="option.value" type="button" :class="[
+            'rounded-full border px-4 py-1.5 text-xs font-semibold transition',
+            option.value === typeFilter
+              ? 'border-blue-600 dark:border-blue-500 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400'
+              : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:border-slate-400 dark:hover:border-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300',
+          ]" @click="selectType(option.value)">
             {{ option.label }}
           </button>
         </div>
       </div>
 
-      <div class="flex-1 min-w-[220px]">
-        <span class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Danh mục</span>
-        <div class="mt-2 flex flex-wrap gap-2">
+      <div class="flex flex-1 flex-col gap-2 min-w-[220px]">
+        <span class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-zinc-500">Danh mục</span>
+        <div class="flex flex-wrap gap-2">
           <button v-for="category in categories" :key="category.id" type="button"
-            class="flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition"
-            :class="selectedCategories.includes(category.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'"
-            @click="selectCategory(category.id)">
+            class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition" :class="selectedCategories.includes(category.id)
+              ? 'border-blue-600 dark:border-blue-500 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400'
+              : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:border-blue-300 dark:hover:border-blue-700'
+              " @click="selectCategory(category.id)">
             <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: category.color || '#CBD5F5' }" />
             {{ category.name }}
           </button>
@@ -27,49 +32,50 @@
     </div>
 
     <div class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500">
+      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-zinc-500">
         Từ ngày
         <input type="date"
-          class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500"
+          class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-slate-800 dark:text-zinc-200 outline-none transition focus:border-blue-500"
           :value="startDate ?? ''" @input="handleDateInput('start', $event)" />
       </label>
 
-      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500">
+      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-zinc-500">
         Đến ngày
         <input type="date"
-          class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500"
+          class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-slate-800 dark:text-zinc-200 outline-none transition focus:border-blue-500"
           :value="endDate ?? ''" @input="handleDateInput('end', $event)" />
       </label>
 
-      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500">
+      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-zinc-500">
         Số tiền từ
         <input type="number" min="0" step="1000"
-          class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500"
+          class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-slate-800 dark:text-zinc-200 outline-none transition focus:border-blue-500"
           :value="minAmount ?? ''" @input="handleAmountInput('min', $event)" />
       </label>
 
-      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500">
+      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-zinc-500">
         Đến
         <input type="number" min="0" step="1000"
-          class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500"
+          class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-slate-800 dark:text-zinc-200 outline-none transition focus:border-blue-500"
           :value="maxAmount ?? ''" @input="handleAmountInput('max', $event)" />
       </label>
 
-      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 md:col-span-2">
+      <label class="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-zinc-500 md:col-span-2">
         Tìm theo nội dung
         <SearchInput :model-value="searchQuery ?? ''" placeholder="Tìm mô tả, ghi chú hoặc danh mục" :debounce="300"
           @update:model-value="handleSearchChange" />
       </label>
     </div>
 
-    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
-      <p class="text-sm font-semibold text-slate-600">
+    <div
+      class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 dark:border-zinc-800 pt-3">
+      <p class="text-sm font-semibold text-slate-600 dark:text-zinc-400">
         Hiển thị
-        <span class="text-lg text-slate-900">{{ resultCount ?? 0 }}</span>
+        <span class="text-lg text-slate-900 dark:text-white">{{ resultCount ?? 0 }}</span>
         giao dịch
       </p>
       <button type="button"
-        class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+        class="rounded-2xl border border-slate-200 dark:border-zinc-700 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 transition hover:border-slate-400 dark:hover:border-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="!hasActiveFilters" @click="clearFilters">
         Xóa bộ lọc
       </button>

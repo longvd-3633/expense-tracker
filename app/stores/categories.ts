@@ -91,16 +91,21 @@ export const useCategoriesStore = defineStore('categories', () => {
     color: string,
     icon?: string
   ) => {
-    if (!user.value) throw new Error('User not authenticated')
-
     try {
       loading.value = true
       error.value = null
 
+      // Get current session to ensure we have the authenticated user
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user?.id) {
+        throw new Error('User not authenticated')
+      }
+
       const { data, error: insertError } = await supabase
         .from('categories')
         .insert({
-          user_id: user.value.id,
+          user_id: session.user.id,
           name,
           type,
           color,
@@ -142,11 +147,16 @@ export const useCategoriesStore = defineStore('categories', () => {
       icon?: string
     }
   ) => {
-    if (!user.value) throw new Error('User not authenticated')
-
     try {
       loading.value = true
       error.value = null
+
+      // Get current session to ensure we have the authenticated user
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user?.id) {
+        throw new Error('User not authenticated')
+      }
 
       const category = categories.value.find(c => c.id === id)
       if (!category) throw new Error('Category not found')
@@ -156,7 +166,7 @@ export const useCategoriesStore = defineStore('categories', () => {
         .from('categories')
         .update(updates)
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
         .select()
         .single()
 
@@ -188,11 +198,16 @@ export const useCategoriesStore = defineStore('categories', () => {
   }
 
   const deleteCategory = async (id: string) => {
-    if (!user.value) throw new Error('User not authenticated')
-
     try {
       loading.value = true
       error.value = null
+
+      // Get current session to ensure we have the authenticated user
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user?.id) {
+        throw new Error('User not authenticated')
+      }
 
       const category = categories.value.find(c => c.id === id)
       if (!category) throw new Error('Category not found')
@@ -210,7 +225,7 @@ export const useCategoriesStore = defineStore('categories', () => {
         .from('categories')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
 
       if (deleteError) throw deleteError
 

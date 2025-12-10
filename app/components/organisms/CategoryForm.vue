@@ -90,13 +90,15 @@ const close = () => {
           enter-to-class="opacity-100 scale-100" leave-active-class="transition ease-in duration-150"
           leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
           <div v-if="isOpen"
-            class="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            class="relative bg-white dark:bg-zinc-900 rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <!-- Header -->
-            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 class="text-xl font-semibold text-gray-900">
+            <div
+              class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between">
+              <h3 class="text-xl font-semibold text-slate-900 dark:text-white">
                 {{ category ? 'Chỉnh sửa danh mục' : 'Tạo danh mục mới' }}
               </h3>
-              <button @click="close" class="text-gray-400 hover:text-gray-600 transition-colors">
+              <button @click="close"
+                class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -108,34 +110,35 @@ const close = () => {
             <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
               <!-- Name -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Tên danh mục <span class="text-red-500">*</span>
                 </label>
                 <input v-model="name" type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  :class="{ 'border-red-500': errors.name }" placeholder="VD: Đi chợ, Lương..." maxlength="50" />
-                <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
+                  class="w-full px-3 py-2 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  :class="{ 'border-red-500 dark:border-red-700': errors.name }" placeholder="VD: Đi chợ, Lương..."
+                  maxlength="50" />
+                <p v-if="errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.name }}</p>
               </div>
 
               <!-- Type -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Loại <span class="text-red-500">*</span>
                 </label>
                 <div class="flex gap-3">
                   <button type="button" @click="type = 'income'" :class="[
                     'flex-1 px-4 py-3 rounded-lg border-2 font-medium transition-colors',
                     type === 'income'
-                      ? 'border-green-500 bg-green-50 text-green-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'border-green-500 bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-400'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-700'
                   ]">
                     Thu nhập
                   </button>
                   <button type="button" @click="type = 'expense'" :class="[
                     'flex-1 px-4 py-3 rounded-lg border-2 font-medium transition-colors',
                     type === 'expense'
-                      ? 'border-red-500 bg-red-50 text-red-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-400'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-700'
                   ]">
                     Chi tiêu
                   </button>
@@ -144,27 +147,27 @@ const close = () => {
 
               <!-- Color -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Màu sắc <span class="text-red-500">*</span>
                 </label>
                 <ColorPicker v-model="color" />
-                <p v-if="errors.color" class="mt-1 text-sm text-red-600">{{ errors.color }}</p>
+                <p v-if="errors.color" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.color }}</p>
               </div>
 
               <!-- Icon (optional) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Icon (tùy chọn)
                 </label>
                 <input v-model="icon" type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  class="w-full px-3 py-2 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="VD: 🛒, 💰, 🏠" />
               </div>
 
               <!-- Actions -->
               <div class="flex gap-3 pt-4">
                 <button type="button" @click="close"
-                  class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                  class="flex-1 px-4 py-2 border border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
                   Hủy
                 </button>
                 <button type="submit"

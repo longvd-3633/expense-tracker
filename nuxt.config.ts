@@ -5,10 +5,19 @@ export default defineNuxtConfig({
   
   modules: [
     '@nuxtjs/tailwindcss',
+    '@nuxtjs/color-mode',
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxtjs/supabase',
   ],
+
+  colorMode: {
+    classSuffix: '',
+    preference: 'system',
+    fallback: 'light',
+    storageKey: 'expense-tracker-color-mode',
+    dataValue: 'theme',
+  },
 
   supabase: {
     redirect: false,

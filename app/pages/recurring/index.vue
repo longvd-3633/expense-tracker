@@ -120,10 +120,10 @@ useHead({
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">
+          <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
             Giao dịch định kỳ
           </h1>
-          <p class="text-gray-600 mt-2">
+          <p class="text-slate-600 dark:text-zinc-400 mt-2">
             Quản lý các mẫu giao dịch tự động lặp lại
           </p>
         </div>
@@ -138,32 +138,34 @@ useHead({
 
       <!-- Summary Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+        <div class="bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 p-4">
           <div class="flex items-center gap-3">
-            <div class="p-3 bg-blue-100 rounded-lg">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+              <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <p class="text-sm text-gray-600">Mẫu đang hoạt động</p>
-              <p class="text-2xl font-bold text-gray-900">
+              <p class="text-sm text-slate-600 dark:text-zinc-400">Mẫu đang hoạt động</p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
                 {{ recurringStore.activeCount }}
               </p>
             </div>
           </div>
         </div>
 
-        <div class="bg-green-50 rounded-lg border border-green-200 p-4">
+        <div class="bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800 p-4">
           <div class="flex items-center gap-3">
-            <div class="p-3 bg-green-100 rounded-lg">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-green-100 dark:bg-green-900/50 rounded-lg">
+              <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
             </div>
             <div>
-              <p class="text-sm text-gray-600">Thu nhập định kỳ</p>
+              <p class="text-sm text-slate-600 dark:text-zinc-400">Thu nhập định kỳ</p>
               <p class="text-2xl font-bold text-green-600">
                 {{ recurringStore.getRecurringByType('income').length }}
               </p>
@@ -171,15 +173,15 @@ useHead({
           </div>
         </div>
 
-        <div class="bg-red-50 rounded-lg border border-red-200 p-4">
+        <div class="bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800 p-4">
           <div class="flex items-center gap-3">
-            <div class="p-3 bg-red-100 rounded-lg">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-red-100 dark:bg-red-900/50 rounded-lg">
+              <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
               </svg>
             </div>
             <div>
-              <p class="text-sm text-gray-600">Chi tiêu định kỳ</p>
+              <p class="text-sm text-slate-600 dark:text-zinc-400">Chi tiêu định kỳ</p>
               <p class="text-2xl font-bold text-red-600">
                 {{ recurringStore.getRecurringByType('expense').length }}
               </p>
@@ -199,7 +201,7 @@ useHead({
 
     <!-- Error Display -->
     <div v-if="recurringStore.error"
-      class="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg">
+      class="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded shadow-lg">
       <p class="font-medium">Lỗi</p>
       <p class="text-sm">{{ recurringStore.error }}</p>
     </div>

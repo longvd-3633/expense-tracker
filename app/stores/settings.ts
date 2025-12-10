@@ -24,14 +24,20 @@ const DEFAULT_SETTINGS: Settings = {
 
 export const useSettingsStore = defineStore('settings', () => {
   const supabase = useSupabaseClient<any>()
-  const user = useSupabaseUser()
 
   const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  // Helper to get current user ID
+  const getUserId = async (): Promise<string | null> => {
+    const { data: { user } } = await supabase.auth.getUser()
+    return user?.id || null
+  }
+
   const fetchSettings = async () => {
-    if (!user.value?.id) {
+    const userId = await getUserId()
+    if (!userId) {
       settings.value = { ...DEFAULT_SETTINGS }
       return
     }
@@ -43,13 +49,13 @@ export const useSettingsStore = defineStore('settings', () => {
       const { data, error: fetchError } = await supabase
         .from('user_settings')
         .select('*')
-        .eq('user_id', user.value.id)
+        .eq('user_id', userId)
         .single()
 
       if (fetchError) {
         if (fetchError.code === 'PGRST116') {
           // No settings found, create default
-          await createDefaultSettings()
+          await createDefaultSettings(userId)
         } else {
           throw fetchError
         }
@@ -72,12 +78,13 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  const createDefaultSettings = async () => {
-    if (!user.value?.id) return
+  const createDefaultSettings = async (userId?: string) => {
+    const uid = userId || await getUserId()
+    if (!uid) return
 
     try {
       const insertData: Database['public']['Tables']['user_settings']['Insert'] = {
-        user_id: user.value.id,
+        user_id: uid,
         currency: DEFAULT_SETTINGS.currency,
         date_format: DEFAULT_SETTINGS.dateFormat,
         number_format: DEFAULT_SETTINGS.numberFormat,
@@ -98,8 +105,12 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   const updateSettings = async (updates: Partial<Settings>) => {
-    if (!user.value?.id) {
+    const userId = await getUserId()
+    console.log('[Settings Store] updateSettings called, user:', userId)
+    
+    if (!userId) {
       // Update local state only if not logged in
+      console.log('[Settings Store] No user, updating local state only')
       settings.value = { ...settings.value, ...updates }
       return
     }
@@ -108,8 +119,8 @@ export const useSettingsStore = defineStore('settings', () => {
       loading.value = true
       error.value = null
 
-      const dbUpdates: Partial<Database['public']['Tables']['user_settings']['Update']> = {
-        user_id: user.value.id,
+      // Build update object with snake_case keys for database
+      const dbUpdates: Record<string, any> = {
         updated_at: new Date().toISOString(),
       }
       if (updates.currency !== undefined) dbUpdates.currency = updates.currency
@@ -118,14 +129,22 @@ export const useSettingsStore = defineStore('settings', () => {
       if (updates.defaultView !== undefined) dbUpdates.default_view = updates.defaultView
       if (updates.theme !== undefined) dbUpdates.theme = updates.theme
 
-      const { error: updateError } = await supabase
+      console.log('[Settings Store] Updating with:', dbUpdates)
+
+      // Use update instead of upsert for existing records
+      const { error: updateError, data } = await supabase
         .from('user_settings')
-        .upsert(dbUpdates)
+        .update(dbUpdates)
+        .eq('user_id', userId)
+        .select()
+
+      console.log('[Settings Store] Update result:', { data, error: updateError })
 
       if (updateError) throw updateError
 
       // Update local state
       settings.value = { ...settings.value, ...updates }
+      console.log('[Settings Store] Local state updated:', settings.value)
     } catch (err) {
       console.error('Error updating settings:', err)
       error.value = err instanceof Error ? err.message : 'Failed to update settings'

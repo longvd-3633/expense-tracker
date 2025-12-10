@@ -126,8 +126,11 @@ export const useRecurringStore = defineStore('recurring', () => {
    * Fetch all recurring transactions for current user
    */
   const fetchRecurringTransactions = async () => {
-    if (!user.value?.id) {
-      console.warn('[RecurringStore] No user ID, skipping fetch')
+    // Get current session for reliable user ID
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      console.warn('[RecurringStore] No user session, skipping fetch')
       return
     }
 
@@ -138,9 +141,8 @@ export const useRecurringStore = defineStore('recurring', () => {
       const { data, error: fetchError } = await supabase
         .from('recurring_transactions')
         .select('*')
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
         .is('deleted_at', null)
-        .not('category_id', 'is', null) // Only fetch templates with valid category
         .order('next_occurrence_date', { ascending: true })
 
       if (fetchError) throw fetchError
@@ -161,8 +163,11 @@ export const useRecurringStore = defineStore('recurring', () => {
   const createRecurringTransaction = async (
     input: RecurringTransactionInput
   ): Promise<RecurringTransaction | null> => {
-    if (!user.value?.id) {
-      error.value = 'User not authenticated'
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      error.value = 'Người dùng chưa đăng nhập'
       return null
     }
 
@@ -170,7 +175,7 @@ export const useRecurringStore = defineStore('recurring', () => {
     error.value = null
 
     try {
-      const record = mapInputToRecord(input, user.value.id)
+      const record = mapInputToRecord(input, session.user.id)
 
       const { data, error: insertError } = await supabase
         .from('recurring_transactions')
@@ -201,8 +206,11 @@ export const useRecurringStore = defineStore('recurring', () => {
     id: string,
     updates: Partial<RecurringTransactionInput>
   ): Promise<boolean> => {
-    if (!user.value) {
-      error.value = 'User not authenticated'
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      error.value = 'Người dùng chưa đăng nhập'
       return false
     }
 
@@ -272,7 +280,7 @@ export const useRecurringStore = defineStore('recurring', () => {
         .from('recurring_transactions')
         .update(updateRecord)
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
         .select()
         .single()
 
@@ -299,8 +307,11 @@ export const useRecurringStore = defineStore('recurring', () => {
    * Soft delete recurring transaction (set is_active = false)
    */
   const deleteRecurringTransaction = async (id: string): Promise<boolean> => {
-    if (!user.value?.id) {
-      error.value = 'User not authenticated'
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      error.value = 'Người dùng chưa đăng nhập'
       return false
     }
 
@@ -312,7 +323,7 @@ export const useRecurringStore = defineStore('recurring', () => {
         .from('recurring_transactions')
         .update({ is_active: false, deleted_at: new Date().toISOString() })
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
 
       if (deleteError) throw deleteError
 
@@ -334,8 +345,11 @@ export const useRecurringStore = defineStore('recurring', () => {
    * Skip the next occurrence of a recurring transaction
    */
   const skipNextOccurrence = async (id: string): Promise<boolean> => {
-    if (!user.value?.id) {
-      error.value = 'User not authenticated'
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user?.id) {
+      error.value = 'Người dùng chưa đăng nhập'
       return false
     }
 
@@ -369,7 +383,7 @@ export const useRecurringStore = defineStore('recurring', () => {
           occurrences_generated: existing.occurrencesGenerated + 1,
         })
         .eq('id', id)
-        .eq('user_id', user.value.id)
+        .eq('user_id', session.user.id)
         .select()
         .single()
 
@@ -399,8 +413,12 @@ export const useRecurringStore = defineStore('recurring', () => {
   /**
    * Subscribe to realtime changes for recurring_transactions
    */
-  const subscribeToChanges = () => {
-    if (!user.value || subscription.value) return
+  const subscribeToChanges = async () => {
+    if (subscription.value) return
+
+    // Get current session for user ID
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user?.id) return
 
     console.log('[RecurringStore] Subscribing to realtime changes')
 
@@ -412,7 +430,7 @@ export const useRecurringStore = defineStore('recurring', () => {
           event: '*',
           schema: 'public',
           table: 'recurring_transactions',
-          filter: `user_id=eq.${user.value.id}`,
+          filter: `user_id=eq.${session.user.id}`,
         },
         (payload: any) => {
           console.log('[RecurringStore] Realtime event:', payload.eventType)
@@ -459,7 +477,7 @@ export const useRecurringStore = defineStore('recurring', () => {
    */
   const initialize = async () => {
     await fetchRecurringTransactions()
-    subscribeToChanges()
+    await subscribeToChanges()
   }
 
   /**

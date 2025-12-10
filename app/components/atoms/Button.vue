@@ -19,10 +19,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const variantClasses = computed(() => {
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white border-transparent disabled:bg-blue-300',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 border-transparent disabled:bg-gray-100',
-    danger: 'bg-red-600 hover:bg-red-700 text-white border-transparent disabled:bg-red-300',
-    ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 border-gray-300 disabled:bg-transparent disabled:text-gray-400',
+    primary: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-transparent shadow-md hover:shadow-lg',
+    secondary: 'bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-600 shadow-sm hover:border-slate-300 dark:hover:border-zinc-500 hover:shadow',
+    danger: 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white border-transparent shadow-md hover:shadow-lg',
+    ghost: 'bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-transparent',
   }
   return variants[props.variant]
 })
@@ -30,8 +30,8 @@ const variantClasses = computed(() => {
 const sizeClasses = computed(() => {
   const sizes = {
     sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-5 py-2.5 text-sm',
   }
   return sizes[props.size]
 })
@@ -39,14 +39,14 @@ const sizeClasses = computed(() => {
 
 <template>
   <button :type="type" :disabled="disabled || loading" :class="[
-    'inline-flex items-center justify-center font-medium rounded-lg border transition-colors duration-200',
-    'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-    'disabled:cursor-not-allowed disabled:opacity-60',
+    'inline-flex items-center justify-center font-medium rounded-xl border transition-all duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 dark:focus:ring-zinc-500 dark:focus:ring-offset-zinc-900',
+    'disabled:cursor-not-allowed disabled:opacity-50',
     variantClasses,
     sizeClasses,
     { 'w-full': fullWidth },
   ]">
-    <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+    <svg v-if="loading" class="-ml-0.5 mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
       viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
       <path class="opacity-75" fill="currentColor"

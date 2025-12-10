@@ -64,24 +64,24 @@ onBeforeUnmount(() => {
 
 const variantMap = {
   income: {
-    text: 'text-emerald-600',
-    muted: 'text-emerald-500',
-    iconWrap: 'bg-emerald-100 text-emerald-600',
-    badge: 'bg-emerald-50 text-emerald-700',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    muted: 'text-emerald-500 dark:text-emerald-400',
+    iconWrap: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400',
+    badge: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300',
     prefix: '+',
   },
   expense: {
-    text: 'text-rose-600',
-    muted: 'text-rose-500',
-    iconWrap: 'bg-rose-100 text-rose-600',
-    badge: 'bg-rose-50 text-rose-700',
+    text: 'text-rose-600 dark:text-rose-400',
+    muted: 'text-rose-500 dark:text-rose-400',
+    iconWrap: 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400',
+    badge: 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300',
     prefix: '-',
   },
   balance: {
-    text: 'text-blue-600',
-    muted: 'text-blue-500',
-    iconWrap: 'bg-blue-100 text-blue-600',
-    badge: 'bg-blue-50 text-blue-700',
+    text: 'text-blue-600 dark:text-blue-400',
+    muted: 'text-blue-500 dark:text-blue-400',
+    iconWrap: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400',
+    badge: 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300',
     prefix: '',
   },
 } as const
@@ -104,10 +104,11 @@ const resolvedPrefix = computed(() => {
 </script>
 
 <template>
-  <article class="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+  <article
+    class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-sm font-medium text-gray-500">{{ label }}</p>
+        <p class="text-sm font-medium text-slate-500 dark:text-zinc-400">{{ label }}</p>
         <p class="text-3xl font-semibold" :class="currentVariant.text">
           <span class="mr-1">{{ resolvedPrefix }}</span>{{ formattedValue }}
         </p>
@@ -124,13 +125,13 @@ const resolvedPrefix = computed(() => {
       </span>
     </div>
 
-    <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+    <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-zinc-400">
       <span v-if="chipLabel" class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
         :class="currentVariant.badge">
         <span class="h-1.5 w-1.5 rounded-full bg-current" />
         {{ chipLabel }}
       </span>
-      <p v-if="description" class="text-gray-500">{{ description }}</p>
+      <p v-if="description" class="text-slate-500 dark:text-zinc-400">{{ description }}</p>
       <slot name="meta" />
     </div>
   </article>

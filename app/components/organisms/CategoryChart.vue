@@ -25,6 +25,10 @@ const emit = defineEmits<{
 
 const { formatCurrency } = useFormatters()
 
+// Detect dark mode for chart colors
+const colorMode = useColorMode()
+const isDark = computed(() => colorMode.value === 'dark')
+
 const totalValue = computed(() => props.slices.reduce((sum, slice) => sum + slice.value, 0))
 const hasData = computed(() => totalValue.value > 0)
 const minAngle = computed(() => (props.slices.length ? Math.PI * 0.02 : 0))
@@ -59,6 +63,11 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: { display: false },
     tooltip: {
+      backgroundColor: isDark.value ? '#3F3F46' : '#0F172A',
+      titleColor: '#F8FAFC',
+      bodyColor: '#E2E8F0',
+      borderColor: isDark.value ? '#52525B' : '#1E293B',
+      borderWidth: 1,
       callbacks: {
         title(context: any) {
           return context[0]?.label || ''
@@ -75,7 +84,7 @@ const chartOptions = computed(() => ({
   elements: {
     arc: {
       borderWidth: 2,
-      borderColor: '#ffffff',
+      borderColor: isDark.value ? '#27272A' : '#ffffff',
       hoverOffset: 14,
       minAngle: minAngle.value,
     },
@@ -91,17 +100,18 @@ const legendItems = computed(() =>
 </script>
 
 <template>
-  <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm h-full flex flex-col">
+  <section
+    class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm h-full flex flex-col">
     <header class="mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-500">{{ title }}</p>
-      <p class="text-sm text-gray-500">Tổng chi: {{ formatCurrency(totalValue) }}</p>
+      <p class="text-sm text-slate-500 dark:text-zinc-400">Tổng chi: {{ formatCurrency(totalValue) }}</p>
     </header>
 
-    <div v-if="loading" class="h-72 w-full animate-pulse rounded-xl bg-slate-50" />
+    <div v-if="loading" class="h-72 w-full animate-pulse rounded-xl bg-slate-50 dark:bg-zinc-800" />
 
     <div v-else>
       <div v-if="!hasData"
-        class="rounded-xl border border-dashed border-gray-200 bg-slate-50/60 p-8 text-center text-sm text-gray-500">
+        class="rounded-xl border border-dashed border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/60 p-8 text-center text-sm text-slate-500 dark:text-zinc-400">
         Không có dữ liệu chi tiêu trong giai đoạn này
       </div>
 
@@ -109,13 +119,15 @@ const legendItems = computed(() =>
         <ClientOnly>
           <div class="relative mx-auto h-64 w-64 cursor-pointer">
             <Doughnut :data="chartData" :options="chartOptions" />
-            <div class="absolute inset-0 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
-              <span class="text-sm uppercase tracking-widest text-gray-400">Tổng chi</span>
-              <span class="text-lg font-semibold text-gray-900 whitespace-nowrap">{{ formatCurrency(totalValue) }}</span>
+            <div
+              class="absolute inset-0 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
+              <span class="text-sm uppercase tracking-widest text-slate-400 dark:text-zinc-500">Tổng chi</span>
+              <span class="text-lg font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{
+                formatCurrency(totalValue) }}</span>
             </div>
           </div>
           <template #fallback>
-            <div class="h-64 w-64 animate-pulse rounded-full bg-slate-50" />
+            <div class="h-64 w-64 animate-pulse rounded-full bg-slate-50 dark:bg-zinc-800" />
           </template>
         </ClientOnly>
 
@@ -123,11 +135,12 @@ const legendItems = computed(() =>
           <li v-for="item in legendItems" :key="item.label" class="flex items-center justify-between text-sm">
             <div class="flex items-center gap-3">
               <span class="inline-flex h-3 w-3 rounded-full" :style="{ backgroundColor: item.color }" />
-              <span class="font-medium text-gray-900">{{ item.label }}</span>
-              <span v-if="item.isOthers" class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Gộp</span>
+              <span class="font-medium text-slate-900 dark:text-white">{{ item.label }}</span>
+              <span v-if="item.isOthers"
+                class="rounded-full bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 text-xs text-slate-500 dark:text-zinc-400">Gộp</span>
             </div>
-            <div class="text-right text-gray-500">
-              <p class="font-medium text-gray-900">{{ formatCurrency(item.value) }}</p>
+            <div class="text-right text-slate-500 dark:text-zinc-400">
+              <p class="font-medium text-slate-900 dark:text-white">{{ formatCurrency(item.value) }}</p>
               <p class="text-xs">{{ item.percentage }}%</p>
             </div>
           </li>
