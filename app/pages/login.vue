@@ -94,25 +94,34 @@ const handleLogin = async () => {
   try {
     loading.value = true
 
+    console.log('Calling login API...')
     const result = await login(form.value.email, form.value.password)
     console.log('Login successful:', result.user?.email)
 
-    // Get redirect path before navigation
-    const redirect = route.query.redirect as string || '/'
-    console.log('Redirecting to:', redirect)
+    // Wait a moment for session to be established
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     // Use window.location for full page reload to ensure auth state is fresh
-    // This prevents middleware issues with stale user state
-    window.location.href = redirect
+    window.location.href = '/'
   } catch (e: any) {
     console.error('Login error:', e)
+    console.error('Login error details:', {
+      message: e.message,
+      status: e.status,
+      code: e.code,
+      name: e.name
+    })
+    
     if (e.message?.includes('Invalid login credentials')) {
       error.value = 'Email hoặc mật khẩu không đúng.'
     } else if (e.message?.includes('Email not confirmed')) {
       error.value = 'Vui lòng xác thực email trước khi đăng nhập.'
+    } else if (e.message?.includes('fetch') || e.message?.includes('network')) {
+      error.value = 'Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.'
     } else {
       error.value = e.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
     }
+  } finally {
     loading.value = false
   }
 }

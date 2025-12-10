@@ -3,6 +3,15 @@
     <div class="max-w-2xl w-full bg-white rounded-lg shadow-lg p-6">
       <h1 class="text-2xl font-bold mb-4">🔍 Auth Debug Helper</h1>
       
+      <!-- Supabase Config -->
+      <div class="mb-4 p-4 bg-purple-50 rounded">
+        <h2 class="font-semibold mb-2">Supabase Config:</h2>
+        <div class="text-sm space-y-1">
+          <p><strong>URL:</strong> {{ supabaseUrl || '❌ NOT SET' }}</p>
+          <p><strong>Key:</strong> {{ supabaseKey ? '✅ Set (' + supabaseKey.substring(0, 20) + '...)' : '❌ NOT SET' }}</p>
+        </div>
+      </div>
+
       <!-- Current URL -->
       <div class="mb-4 p-4 bg-blue-50 rounded">
         <h2 class="font-semibold mb-2">Current URL:</h2>
@@ -16,6 +25,21 @@
           ✅ Logged in as: <strong>{{ session.user.email }}</strong>
         </p>
         <p v-else class="text-sm">❌ No active session</p>
+      </div>
+
+      <!-- Test Login -->
+      <div class="mb-4 p-4 bg-orange-50 rounded">
+        <h2 class="font-semibold mb-2">Test API Connection:</h2>
+        <button 
+          @click="testConnection" 
+          :disabled="testing"
+          class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-50"
+        >
+          {{ testing ? 'Testing...' : 'Test Supabase Connection' }}
+        </button>
+        <div v-if="testResult" class="mt-2 text-sm">
+          <pre class="bg-white p-2 rounded overflow-auto">{{ testResult }}</pre>
+        </div>
       </div>
 
       <!-- URL Parameters -->
@@ -103,7 +127,54 @@ const refresh = () => {
   window.location.reload()
 }
 
+// Get Supabase config
+const runtimeConfig = useRuntimeConfig()
+const supabaseUrl = ref('')
+const supabaseKey = ref('')
+const testing = ref(false)
+const testResult = ref('')
+
+const testConnection = async () => {
+  testing.value = true
+  testResult.value = ''
+  
+  try {
+    // Test 1: Check if Supabase client works
+    const { data, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      testResult.value = `❌ Error: ${error.message}`
+    } else {
+      testResult.value = `✅ Supabase connection OK\nSession: ${data.session ? 'Active' : 'None'}`
+      
+      // Test 2: Try a simple query
+      try {
+        const { error: queryError } = await supabase.from('user_settings').select('id').limit(1)
+        if (queryError) {
+          testResult.value += `\n⚠️ Query test: ${queryError.message}`
+        } else {
+          testResult.value += `\n✅ Database query OK`
+        }
+      } catch (e: any) {
+        testResult.value += `\n⚠️ Query test failed: ${e.message}`
+      }
+    }
+  } catch (e: any) {
+    testResult.value = `❌ Connection failed: ${e.message}`
+  } finally {
+    testing.value = false
+  }
+}
+
 onMounted(() => {
   loadDebugInfo()
+  
+  // Try to get Supabase URL from various sources
+  supabaseUrl.value = (supabase as any).supabaseUrl || 
+                      (supabase as any).restUrl?.replace('/rest/v1', '') ||
+                      'Unable to detect'
+  supabaseKey.value = (supabase as any).supabaseKey || 
+                      (supabase as any).anonKey ||
+                      'Unable to detect'
 })
 </script>
