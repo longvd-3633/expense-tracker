@@ -2,6 +2,29 @@
 
 ## 1. Cấu hình Email Templates
 
+### Confirm Signup Email Template
+
+Vào Supabase Dashboard → Authentication → Email Templates → **Confirm signup**
+
+**Subject:**
+```
+Confirm Your Email
+```
+
+**Body (HTML):**
+```html
+<h2>Confirm Your Email</h2>
+<p>Follow this link to confirm your email:</p>
+<p><a href="{{ .ConfirmationURL }}">Confirm Email</a></p>
+<p>Or copy and paste this URL into your browser:</p>
+<p>{{ .ConfirmationURL }}</p>
+```
+
+**⚠️ QUAN TRỌNG:**
+- **PHẢI dùng `{{ .ConfirmationURL }}`** - đây là URL có PKCE code được Supabase tạo tự động
+- KHÔNG tự tạo URL với {{ .Token }} hoặc {{ .TokenHash }}
+- Link sẽ tự động redirect về `/auth/callback` đã cấu hình
+
 ### Reset Password Email Template
 
 Vào Supabase Dashboard → Authentication → Email Templates → Reset Password
@@ -15,15 +38,14 @@ Reset Your Password
 ```html
 <h2>Reset Password</h2>
 <p>Follow this link to reset the password for your user:</p>
-<p><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery">Reset Password</a></p>
+<p><a href="{{ .ConfirmationURL }}">Reset Password</a></p>
 <p>Or copy and paste this URL into your browser:</p>
-<p>{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</p>
+<p>{{ .ConfirmationURL }}</p>
 ```
 
 **⚠️ QUAN TRỌNG:**
-- Link phải dẫn về `/auth/callback` (không phải `/reset-password`)
-- Phải có `type=recovery` trong URL
-- Sử dụng `token_hash` parameter
+- Cũng dùng `{{ .ConfirmationURL }}` cho reset password
+- Supabase sẽ tự động thêm type=recovery
 
 ## 2. Cấu hình Site URL
 

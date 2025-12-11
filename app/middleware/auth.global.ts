@@ -16,18 +16,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const { data: { session } } = await supabase.auth.getSession()
   const user = session?.user
 
-  console.log('[Auth Middleware]', {
-    path: to.path,
-    normalizedPath,
-    isPublic: isPublicRoute,
-    hasSession: !!session,
-    hasUser: !!user,
-    userEmail: user?.email || 'none'
-  })
-
   // If user is not authenticated and trying to access protected route
   if (!user && !isPublicRoute) {
-    console.log('[Auth Middleware] Redirecting to login - no user')
     
     // Prevent redirect loop - don't add redirect query if already going to login
     const redirectPath = to.fullPath
@@ -43,8 +33,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If user is authenticated and trying to access auth pages (but not welcome/debug/callback), redirect to home
   if (user && isPublicRoute && normalizedPath !== '/welcome' && normalizedPath !== '/debug-auth' && !normalizedPath.startsWith('/auth/')) {
-    console.log('[Auth Middleware] User authenticated, redirecting away from auth page')
-    
     // Load settings if not already loaded
     if (!settingsStore.settings) {
       await settingsStore.fetchSettings()

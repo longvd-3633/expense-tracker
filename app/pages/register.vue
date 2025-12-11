@@ -15,10 +15,23 @@
       </div>
 
       <!-- Success Message -->
-      <div v-if="success" class="rounded-md bg-green-50 dark:bg-green-950/50 p-4">
-        <p class="text-sm text-green-800 dark:text-green-200">
-          Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.
-        </p>
+      <div v-if="success" class="rounded-md bg-green-50 dark:bg-green-950/50 p-4 space-y-2">
+        <div class="flex items-start">
+          <svg class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-green-800 dark:text-green-200">
+              Đăng ký thành công!
+            </p>
+            <p class="mt-1 text-sm text-green-700 dark:text-green-300">
+              Vui lòng kiểm tra email <strong>{{ form.email }}</strong> để xác thực tài khoản.
+            </p>
+            <p class="mt-2 text-xs text-green-600 dark:text-green-400">
+              💡 Lưu ý: Hãy mở link xác thực trong cùng trình duyệt này để hoàn tất đăng ký.
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- Form -->

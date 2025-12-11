@@ -83,46 +83,37 @@ const redirectWithCountdown = async (path: string) => {
 
 onMounted(async () => {
   try {
-    console.log('Callback URL:', window.location.href)
+    // Wait a bit to ensure UI is rendered
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     // Check URL query params
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     const tokenHash = urlParams.get('token_hash')
     const type = urlParams.get('type')
-    
-    console.log('Code:', code ? 'present' : 'missing')
-    console.log('Token Hash:', tokenHash ? 'present' : 'missing')
-    console.log('Type:', type)
 
-    // Wait a bit to ensure UI is rendered
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    // Method 1: PKCE flow with code (newest flow)
+    // Method 1: Handle auth code from URL (email confirmation)
+    // Supabase now sends users here after email confirmation with a code parameter
     if (code) {
-      console.log('Using PKCE flow with code exchange...')
+      // Check if we already have a session (Supabase may have auto-exchanged it)
+      const { data: { session: existingSession } } = await supabase.auth.getSession()
       
-      // Exchange code for session - Supabase client handles this automatically
-      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-      
-      if (exchangeError) {
-        console.error('Code exchange error:', exchangeError)
-        throw new Error('Không thể xác thực mã. Link có thể đã hết hạn hoặc đã được sử dụng.')
-      }
-      
-      if (data.session) {
-        console.log('Session created via PKCE:', data.session.user.email)
+      if (existingSession) {
         
         // Show success message
         loading.value = false
         success.value = true
         
-        // Set message based on type
+        // Determine if this is a new user (created in last 2 minutes)
+        const userCreatedAt = new Date(existingSession.user.created_at).getTime()
+        const twoMinutesAgo = Date.now() - 120000
+        const isNewUser = userCreatedAt > twoMinutesAgo
+        
         if (type === 'recovery') {
           successTitle.value = 'Xác thực thành công!'
           successMessage.value = 'Bạn sẽ được chuyển đến trang đặt lại mật khẩu.'
           await redirectWithCountdown('/reset-password')
-        } else if (type === 'signup') {
+        } else if (isNewUser) {
           successTitle.value = 'Kích hoạt tài khoản thành công! 🎉'
           successMessage.value = 'Tài khoản của bạn đã được kích hoạt. Chào mừng bạn đến với Expense Tracker!'
           await redirectWithCountdown('/')
@@ -134,13 +125,52 @@ onMounted(async () => {
         return
       }
       
-      throw new Error('Không thể tạo session từ mã xác thực')
+      // If no session yet, wait a bit for Supabase auth listener to process it
+      let attempts = 0
+      const maxAttempts = 15 // Wait up to 3 seconds
+      
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+        
+        const { data: { session: newSession } } = await supabase.auth.getSession()
+        
+        if (newSession) {
+          loading.value = false
+          success.value = true
+          
+          const userCreatedAt = new Date(newSession.user.created_at).getTime()
+          const twoMinutesAgo = Date.now() - 120000
+          const isNewUser = userCreatedAt > twoMinutesAgo
+          
+          if (type === 'recovery') {
+            successTitle.value = 'Xác thực thành công!'
+            successMessage.value = 'Bạn sẽ được chuyển đến trang đặt lại mật khẩu.'
+            await redirectWithCountdown('/reset-password')
+          } else if (isNewUser) {
+            successTitle.value = 'Kích hoạt tài khoản thành công! 🎉'
+            successMessage.value = 'Tài khoản của bạn đã được kích hoạt. Chào mừng bạn đến với Expense Tracker!'
+            await redirectWithCountdown('/')
+          } else {
+            successTitle.value = 'Xác thực email thành công!'
+            successMessage.value = 'Email của bạn đã được xác thực thành công.'
+            await redirectWithCountdown('/')
+          }
+          return
+        }
+        
+        attempts++
+      }
+      
+      // Still no session - this means the code couldn't be exchanged
+      // This can happen if:
+      // 1. Link was already used
+      // 2. Link expired
+      // 3. User opened link in different browser (PKCE verifier not found)
+      throw new Error('Không thể xác thực từ link này. Vui lòng thử mở link trong cùng trình duyệt mà bạn đã đăng ký, hoặc link có thể đã hết hạn.')
     }
 
     // Method 2: OTP flow with token_hash (old flow)
     if (tokenHash) {
-      console.log('Verifying token_hash with Supabase...')
-      
       // Verify the OTP token
       const { data, error: verifyError } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
@@ -148,13 +178,10 @@ onMounted(async () => {
       })
       
       if (verifyError) {
-        console.error('Verification error:', verifyError)
         throw new Error('Không thể xác thực token. Link có thể đã hết hạn hoặc đã được sử dụng.')
       }
       
       if (data.session) {
-        console.log('Session created:', data.session.user.email)
-        
         // Show success message
         loading.value = false
         success.value = true
@@ -186,8 +213,6 @@ onMounted(async () => {
     const hashType = hashParams.get('type')
     
     if (accessToken) {
-      console.log('Found access_token, setting session...')
-      
       const { error: sessionError } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken || '',
@@ -216,7 +241,6 @@ onMounted(async () => {
     throw new Error('Không tìm thấy thông tin xác thực trong URL')
     
   } catch (e: any) {
-    console.error('Callback error:', e)
     error.value = e.message || 'Có lỗi xảy ra trong quá trình xác thực'
     loading.value = false
   }

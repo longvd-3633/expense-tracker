@@ -17,6 +17,8 @@ export const useAuth = () => {
   // Register new user
   const register = async (email: string, password: string) => {
     const config = useRuntimeConfig()
+    
+    // First, sign up the user
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -27,13 +29,19 @@ export const useAuth = () => {
 
     if (error) throw error
 
+    // If session was created (auto-login), sign out immediately
+    // User should only login after confirming email
+    if (data.session) {
+      await supabase.auth.signOut()
+    }
+
     // Initialize user settings and categories after successful signup
+    // This will be executed even without session
     if (data.user) {
       try {
         await supabase.rpc('initialize_new_user', { user_uuid: data.user.id })
       } catch (initError) {
-        // Log error but don't fail registration
-        console.warn('Failed to initialize user settings:', initError)
+        // Silently ignore initialization errors
       }
     }
 
