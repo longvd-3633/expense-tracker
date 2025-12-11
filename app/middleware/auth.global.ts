@@ -41,8 +41,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     })
   }
 
-  // If user is authenticated and trying to access auth pages (but not welcome), redirect to home
-  if (user && isPublicRoute && normalizedPath !== '/welcome' && normalizedPath !== '/debug-auth') {
+  // If user is authenticated and trying to access auth pages (but not welcome/debug/callback), redirect to home
+  if (user && isPublicRoute && normalizedPath !== '/welcome' && normalizedPath !== '/debug-auth' && !normalizedPath.startsWith('/auth/')) {
     console.log('[Auth Middleware] User authenticated, redirecting away from auth page')
     
     // Load settings if not already loaded
