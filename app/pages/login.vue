@@ -8,7 +8,7 @@
         </h2>
         <p class="mt-2 text-center text-sm text-slate-600 dark:text-zinc-400">
           Hoặc
-          <NuxtLink to="/register" class="font-medium text-primary hover:text-primary/80">
+          <NuxtLink to="/register" class="font-medium text-blue-600 hover:text-blue-500 dark:text-primary dark:hover:text-primary/80">
             tạo tài khoản mới
           </NuxtLink>
         </p>
@@ -44,7 +44,7 @@
         <!-- Forgot Password Link -->
         <div class="flex items-center justify-end">
           <div class="text-sm">
-            <NuxtLink to="/forgot-password" class="font-medium text-primary hover:text-primary/80">
+            <NuxtLink to="/forgot-password" class="font-medium text-blue-600 hover:text-blue-500 dark:text-primary dark:hover:text-primary/80">
               Quên mật khẩu?
             </NuxtLink>
           </div>
@@ -53,7 +53,7 @@
         <!-- Submit Button -->
         <div>
           <button type="submit" :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-primary dark:hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-zinc-950 dark:focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
             {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
           </button>
         </div>

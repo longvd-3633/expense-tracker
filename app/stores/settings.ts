@@ -69,7 +69,6 @@ export const useSettingsStore = defineStore('settings', () => {
         }
       }
     } catch (err) {
-      console.error('Error fetching settings:', err)
       error.value = err instanceof Error ? err.message : 'Failed to fetch settings'
       // Use defaults on error
       settings.value = { ...DEFAULT_SETTINGS }
@@ -100,17 +99,15 @@ export const useSettingsStore = defineStore('settings', () => {
       
       settings.value = { ...DEFAULT_SETTINGS }
     } catch (err) {
-      console.error('Error creating default settings:', err)
+      // Silently ignore
     }
   }
 
   const updateSettings = async (updates: Partial<Settings>) => {
     const userId = await getUserId()
-    console.log('[Settings Store] updateSettings called, user:', userId)
     
     if (!userId) {
       // Update local state only if not logged in
-      console.log('[Settings Store] No user, updating local state only')
       settings.value = { ...settings.value, ...updates }
       return
     }
@@ -129,24 +126,18 @@ export const useSettingsStore = defineStore('settings', () => {
       if (updates.defaultView !== undefined) dbUpdates.default_view = updates.defaultView
       if (updates.theme !== undefined) dbUpdates.theme = updates.theme
 
-      console.log('[Settings Store] Updating with:', dbUpdates)
-
       // Use update instead of upsert for existing records
-      const { error: updateError, data } = await supabase
+      const { error: updateError } = await supabase
         .from('user_settings')
         .update(dbUpdates)
         .eq('user_id', userId)
         .select()
 
-      console.log('[Settings Store] Update result:', { data, error: updateError })
-
       if (updateError) throw updateError
 
       // Update local state
       settings.value = { ...settings.value, ...updates }
-      console.log('[Settings Store] Local state updated:', settings.value)
     } catch (err) {
-      console.error('Error updating settings:', err)
       error.value = err instanceof Error ? err.message : 'Failed to update settings'
       throw err
     } finally {

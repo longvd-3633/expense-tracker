@@ -40,13 +40,13 @@
         <!-- Submit Button -->
         <div class="space-y-4">
           <button type="submit" :disabled="loading"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-primary dark:hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-zinc-950 dark:focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
             {{ loading ? 'Đang gửi...' : 'Gửi email đặt lại mật khẩu' }}
           </button>
 
           <div class="text-center">
             <NuxtLink to="/login"
-              class="text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200">
+              class="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-primary dark:hover:text-primary/80">
               Quay lại đăng nhập
             </NuxtLink>
           </div>
